@@ -3,11 +3,16 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		4A387ED0277F3C560063B494 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387ECF277F3C560063B494 /* main.swift */; };
+		4A387EDD277F3CC40063B494 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A387EDC277F3CC40063B494 /* Cocoa.framework */; };
+		4A387EDF277F3CC40063B494 /* XcodeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A387EDE277F3CC40063B494 /* XcodeKit.framework */; };
+		4A387EE2277F3CC40063B494 /* SourceEditorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387EE1277F3CC40063B494 /* SourceEditorExtension.swift */; };
+		4A387EE4277F3CC40063B494 /* SourceEditorCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387EE3277F3CC40063B494 /* SourceEditorCommand.swift */; };
+		4A387EEC27808FA10063B494 /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = 4A387EEB27808FA10063B494 /* ArgumentParser */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +30,13 @@
 /* Begin PBXFileReference section */
 		4A387ECC277F3C560063B494 /* DependencyChecker */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DependencyChecker; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A387ECF277F3C560063B494 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		4A387EDA277F3CC40063B494 /* XCodeDependencyChecker.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = XCodeDependencyChecker.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A387EDC277F3CC40063B494 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		4A387EDE277F3CC40063B494 /* XcodeKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XcodeKit.framework; path = Library/Frameworks/XcodeKit.framework; sourceTree = DEVELOPER_DIR; };
+		4A387EE1277F3CC40063B494 /* SourceEditorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceEditorExtension.swift; sourceTree = "<group>"; };
+		4A387EE3277F3CC40063B494 /* SourceEditorCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceEditorCommand.swift; sourceTree = "<group>"; };
+		4A387EE5277F3CC40063B494 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4A387EE6277F3CC40063B494 /* XCodeDependencyChecker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = XCodeDependencyChecker.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +44,16 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A387EEC27808FA10063B494 /* ArgumentParser in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A387ED7277F3CC40063B494 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A387EDD277F3CC40063B494 /* Cocoa.framework in Frameworks */,
+				4A387EDF277F3CC40063B494 /* XcodeKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -42,6 +64,8 @@
 			isa = PBXGroup;
 			children = (
 				4A387ECE277F3C560063B494 /* DependencyChecker */,
+				4A387EE0277F3CC40063B494 /* XCodeDependencyChecker */,
+				4A387EDB277F3CC40063B494 /* Frameworks */,
 				4A387ECD277F3C560063B494 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -50,6 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				4A387ECC277F3C560063B494 /* DependencyChecker */,
+				4A387EDA277F3CC40063B494 /* XCodeDependencyChecker.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -60,6 +85,26 @@
 				4A387ECF277F3C560063B494 /* main.swift */,
 			);
 			path = DependencyChecker;
+			sourceTree = "<group>";
+		};
+		4A387EDB277F3CC40063B494 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4A387EDC277F3CC40063B494 /* Cocoa.framework */,
+				4A387EDE277F3CC40063B494 /* XcodeKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4A387EE0277F3CC40063B494 /* XCodeDependencyChecker */ = {
+			isa = PBXGroup;
+			children = (
+				4A387EE1277F3CC40063B494 /* SourceEditorExtension.swift */,
+				4A387EE3277F3CC40063B494 /* SourceEditorCommand.swift */,
+				4A387EE5277F3CC40063B494 /* Info.plist */,
+				4A387EE6277F3CC40063B494 /* XCodeDependencyChecker.entitlements */,
+			);
+			path = XCodeDependencyChecker;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -78,9 +123,29 @@
 			dependencies = (
 			);
 			name = DependencyChecker;
+			packageProductDependencies = (
+				4A387EEB27808FA10063B494 /* ArgumentParser */,
+			);
 			productName = DependencyChecker;
 			productReference = 4A387ECC277F3C560063B494 /* DependencyChecker */;
 			productType = "com.apple.product-type.tool";
+		};
+		4A387ED9277F3CC40063B494 /* XCodeDependencyChecker */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4A387EE7277F3CC40063B494 /* Build configuration list for PBXNativeTarget "XCodeDependencyChecker" */;
+			buildPhases = (
+				4A387ED6277F3CC40063B494 /* Sources */,
+				4A387ED7277F3CC40063B494 /* Frameworks */,
+				4A387ED8277F3CC40063B494 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = XCodeDependencyChecker;
+			productName = XCodeDependencyChecker;
+			productReference = 4A387EDA277F3CC40063B494 /* XCodeDependencyChecker.appex */;
+			productType = "com.apple.product-type.xcode-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -94,6 +159,9 @@
 					4A387ECB277F3C560063B494 = {
 						CreatedOnToolsVersion = 12.5.1;
 					};
+					4A387ED9277F3CC40063B494 = {
+						CreatedOnToolsVersion = 12.5.1;
+					};
 				};
 			};
 			buildConfigurationList = 4A387EC7277F3C560063B494 /* Build configuration list for PBXProject "DependencyChecker" */;
@@ -105,14 +173,28 @@
 				Base,
 			);
 			mainGroup = 4A387EC3277F3C560063B494;
+			packageReferences = (
+				4A387EEA27808FA10063B494 /* XCRemoteSwiftPackageReference "swift-argument-parser" */,
+			);
 			productRefGroup = 4A387ECD277F3C560063B494 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				4A387ECB277F3C560063B494 /* DependencyChecker */,
+				4A387ED9277F3CC40063B494 /* XCodeDependencyChecker */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4A387ED8277F3CC40063B494 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4A387EC8277F3C560063B494 /* Sources */ = {
@@ -120,6 +202,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				4A387ED0277F3C560063B494 /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A387ED6277F3CC40063B494 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A387EE2277F3CC40063B494 /* SourceEditorExtension.swift in Sources */,
+				4A387EE4277F3CC40063B494 /* SourceEditorCommand.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -263,6 +354,48 @@
 			};
 			name = Release;
 		};
+		4A387EE8277F3CC40063B494 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = XCodeDependencyChecker/XCodeDependencyChecker.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = SZNL2M84RE;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = XCodeDependencyChecker/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestrisolutions.XCodeDependencyChecker;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		4A387EE9277F3CC40063B494 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = XCodeDependencyChecker/XCodeDependencyChecker.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = SZNL2M84RE;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = XCodeDependencyChecker/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestrisolutions.XCodeDependencyChecker;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -284,7 +417,35 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		4A387EE7277F3CC40063B494 /* Build configuration list for PBXNativeTarget "XCodeDependencyChecker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A387EE8277F3CC40063B494 /* Debug */,
+				4A387EE9277F3CC40063B494 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4A387EEA27808FA10063B494 /* XCRemoteSwiftPackageReference "swift-argument-parser" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-argument-parser";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4A387EEB27808FA10063B494 /* ArgumentParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4A387EEA27808FA10063B494 /* XCRemoteSwiftPackageReference "swift-argument-parser" */;
+			productName = ArgumentParser;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4A387EC4277F3C560063B494 /* Project object */;
 }
