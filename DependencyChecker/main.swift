@@ -68,6 +68,20 @@ struct Application: ParsableCommand {
             switch action {
             case .all:
                 print("action: all")
+                let analyser = DependencyChecker()
+                let vulnerableVersionsUsed = analyser.analyseFolder(path: path)
+                
+                for vulnerableVersion in vulnerableVersionsUsed {
+                    var subTarget = ""
+                    if let value = vulnerableVersion.library.subtarget {
+                        subTarget = " - \(value)"
+                    }
+                    
+                    print("  --  \(vulnerableVersion.library.name) - \(vulnerableVersion.library.versionString)\(subTarget)")
+                    if let description = vulnerableVersion.vulnerability.cve?.description {
+                        print("  --  description: \(description)")
+                    }
+                }
             case .dependencies:
                 print("action: dependencies")
                 let analyser = DependencyAnalyser()

@@ -17,6 +17,7 @@
 		4A387EF1278097930063B494 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387EF0278097930063B494 /* Helper.swift */; };
 		4A387EF42781A4840063B494 /* CPEFinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387EF32781A4840063B494 /* CPEFinder.swift */; };
 		4A387EF72781AA7A0063B494 /* VulnerabilityAnalyser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387EF62781AA7A0063B494 /* VulnerabilityAnalyser.swift */; };
+		4A8F79452781B1DC0089DCB8 /* DependencyChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A8F79442781B1DC0089DCB8 /* DependencyChecker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -45,6 +46,7 @@
 		4A387EF0278097930063B494 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		4A387EF32781A4840063B494 /* CPEFinder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CPEFinder.swift; sourceTree = "<group>"; };
 		4A387EF62781AA7A0063B494 /* VulnerabilityAnalyser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VulnerabilityAnalyser.swift; sourceTree = "<group>"; };
+		4A8F79442781B1DC0089DCB8 /* DependencyChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyChecker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +97,7 @@
 				4A387EED278096CA0063B494 /* DependencyAnalysis */,
 				4A387ECF277F3C560063B494 /* main.swift */,
 				4A387EF0278097930063B494 /* Helper.swift */,
+				4A8F79442781B1DC0089DCB8 /* DependencyChecker.swift */,
 			);
 			path = DependencyChecker;
 			sourceTree = "<group>";
@@ -241,6 +244,7 @@
 				4A387ED0277F3C560063B494 /* main.swift in Sources */,
 				4A387EF42781A4840063B494 /* CPEFinder.swift in Sources */,
 				4A387EF72781AA7A0063B494 /* VulnerabilityAnalyser.swift in Sources */,
+				4A8F79452781B1DC0089DCB8 /* DependencyChecker.swift in Sources */,
 				4A387EF1278097930063B494 /* Helper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
