@@ -70,6 +70,25 @@ struct Application: ParsableCommand {
                 print("action: all")
             case .dependencies:
                 print("action: dependencies")
+                let analyser = DependencyAnalyser()
+                let libraries = analyser.analyseApp(folderPath: path)
+                print("Dependencies: ")
+                for library in libraries {
+                    var subTarget = ""
+                    if let value = library.subtarget {
+                        subTarget = " - \(value)"
+                    }
+                    
+                    if let direct = library.directDependency {
+                        if direct {
+                            print("\(library.name) \(library.versionString)\(subTarget)")
+                        } else {
+                            print("Indirect: \(library.name) \(library.versionString)\(subTarget)")
+                        }
+                    } else {
+                        print("\(library.name) \(library.versionString)\(subTarget)")
+                    }
+                }
             case .findcpe:
                 print("action: findcpe")
             case .querycve:
