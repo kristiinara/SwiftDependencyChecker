@@ -104,6 +104,42 @@ struct Application: ParsableCommand {
                 }
             case .querycve:
                 print("action: querycve")
+                let analyser = VulnerabilityAnalyser()
+                if let specificValue = specificValue {
+                    print("Vulnerabilities for cpe: \(specificValue)")
+                    //TODO: check if cpe has correct format??
+                    
+                    let cveList = analyser.queryVulnerabilitiesFor(cpe: specificValue)
+                    print("Found vulnerabilities: \(cveList)")
+                    for cve in cveList {
+                        if let description = cve.cve?.description {
+                            print("Vulnerability: \(description)")
+                            if let configuration = cve.configuration {
+                                let affectedVersions = configuration.affectedVersions
+                                for version in affectedVersions {
+                                    print("    cpe: \(version.cpeString)")
+                                    if let value = version.versionStartIncluding {
+                                        print("    startincluding: \(value)")
+                                    }
+                                    
+                                    if let value = version.versionStartExcluding {
+                                        print("    startexcluding: \(value)")
+                                    }
+                                    if let value = version.versionEndIncluding {
+                                        print("    endtincluding: \(value)")
+                                    }
+                                    if let value = version.versionEndExcluding {
+                                        print("    endtexcluding: \(value)")
+                                    }
+                                }
+                            }
+                        } else {
+                            print("no description")
+                        }
+                    }
+                } else {
+                    print("Currently only analysis with specific value supported.")
+                }
             }
             
         }
