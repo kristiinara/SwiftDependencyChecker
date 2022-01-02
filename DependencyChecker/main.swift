@@ -44,7 +44,7 @@ struct Application: ParsableCommand {
     struct Analyse: ParsableCommand {
         
         @Argument(help: "Path of the project to be analysed, if not specified the current directory is used. (optional)")
-        var path: String
+        var path: String = FileManager.default.currentDirectoryPath
         
         enum Action: String, ExpressibleByArgument {
             case all, dependencies, findcpe, querycve
@@ -91,6 +91,17 @@ struct Application: ParsableCommand {
                 }
             case .findcpe:
                 print("action: findcpe")
+                let analyser = CPEFinder()
+                if let specificValue = specificValue {
+                    print("For library name: \(specificValue)")
+                    if let cpe = analyser.findCPEForLibrary(name: specificValue) {
+                        print("found cpe: \(cpe)")
+                    } else {
+                        print("no found cpe")
+                    }
+                } else {
+                    print("Currently only analysis with specific value supported.")
+                }
             case .querycve:
                 print("action: querycve")
             }

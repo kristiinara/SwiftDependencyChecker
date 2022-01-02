@@ -15,6 +15,7 @@
 		4A387EEC27808FA10063B494 /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = 4A387EEB27808FA10063B494 /* ArgumentParser */; };
 		4A387EEF278096DE0063B494 /* DependencyAnalyser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387EEE278096DE0063B494 /* DependencyAnalyser.swift */; };
 		4A387EF1278097930063B494 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387EF0278097930063B494 /* Helper.swift */; };
+		4A387EF42781A4840063B494 /* CPEFinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387EF32781A4840063B494 /* CPEFinder.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -41,6 +42,7 @@
 		4A387EE6277F3CC40063B494 /* XCodeDependencyChecker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = XCodeDependencyChecker.entitlements; sourceTree = "<group>"; };
 		4A387EEE278096DE0063B494 /* DependencyAnalyser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyAnalyser.swift; sourceTree = "<group>"; };
 		4A387EF0278097930063B494 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
+		4A387EF32781A4840063B494 /* CPEFinder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CPEFinder.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,6 +88,7 @@
 		4A387ECE277F3C560063B494 /* DependencyChecker */ = {
 			isa = PBXGroup;
 			children = (
+				4A387EF22781A46B0063B494 /* CPEAnalysis */,
 				4A387EED278096CA0063B494 /* DependencyAnalysis */,
 				4A387ECF277F3C560063B494 /* main.swift */,
 				4A387EF0278097930063B494 /* Helper.swift */,
@@ -119,6 +122,14 @@
 				4A387EEE278096DE0063B494 /* DependencyAnalyser.swift */,
 			);
 			path = DependencyAnalysis;
+			sourceTree = "<group>";
+		};
+		4A387EF22781A46B0063B494 /* CPEAnalysis */ = {
+			isa = PBXGroup;
+			children = (
+				4A387EF32781A4840063B494 /* CPEFinder.swift */,
+			);
+			path = CPEAnalysis;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -217,6 +228,7 @@
 			files = (
 				4A387EEF278096DE0063B494 /* DependencyAnalyser.swift in Sources */,
 				4A387ED0277F3C560063B494 /* main.swift in Sources */,
+				4A387EF42781A4840063B494 /* CPEFinder.swift in Sources */,
 				4A387EF1278097930063B494 /* Helper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
