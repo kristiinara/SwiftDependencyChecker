@@ -9,7 +9,64 @@ import Foundation
 import os.log
 
 class CPEFinder {
+    var cpeDictionary: CPEDictionary
+    var url: URL
+    var folder: URL
+    var changed = false
+    
+    init() {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        self.folder = home.appendingPathComponent("DependencyInfo", isDirectory: true)
+        
+        self.url = self.folder.appendingPathComponent("cpes.json")
+        
+        if let data = try? Data(contentsOf: url) {
+            let decoder = JSONDecoder()
+            if let decoded = try? decoder.decode(CPEDictionary.self, from: data) {
+                cpeDictionary = decoded
+            } else {
+                cpeDictionary = CPEDictionary(lastUpdated: Date())
+            }
+        } else {
+            cpeDictionary = CPEDictionary(lastUpdated: Date())
+        }
+    }
+    
+    deinit {
+        if changed {
+            save()
+        }
+    }
+    
+    func save() {
+        self.checkFolder()
+        
+        let encoder = JSONEncoder()
+        if let encoded = try? encoder.encode(self.cpeDictionary) {
+            do {
+                try encoded.write(to: url)
+            } catch {
+                os_log("Could not save cpes")
+            }
+        }
+    }
+    
+    func checkFolder() {
+        if !FileManager.default.fileExists(atPath: self.folder.absoluteString) {
+            do {
+                try FileManager.default.createDirectory(at: self.folder, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                os_log("Could not create folder: \(self.folder)")
+            }
+        }
+    }
+    
+    
     func findCPEForLibrary(name: String) -> String? {
+        if let cpe = self.cpeDictionary.dictionary[name] {
+            return cpe.value
+        }
+        
         if name.contains("/") {
             let cpePath = "/Users/kristiina/Phd/Tools/GraphifyEvolution/ExternalAnalysers/CPE/official-cpe-dictionary_v2.3.xml"
 
@@ -33,6 +90,9 @@ class CPEFinder {
                             let cleanedCpe = "\(splitValues.joined(separator: ":"))"
                             os_log("cleaned: \(cleanedCpe)")
                             
+                            self.cpeDictionary.dictionary[name] = CPE(value: cleanedCpe)
+                            self.changed = true
+                            
                             return cleanedCpe
                         }
                     }
@@ -44,8 +104,26 @@ class CPEFinder {
             os_log("name does not contain \"/\"")
         }
         
+        self.cpeDictionary.dictionary[name] = CPE(value: nil)
         return nil
     }
 }
 
+class CPEDictionary: Codable {
+    var lastUpdated: Date
+    var dictionary: [String: CPE]
+    
+    init(lastUpdated: Date) {
+        self.lastUpdated = lastUpdated
+        dictionary = [:]
+    }
+}
+
+class CPE: Codable {
+    var value: String?
+    
+    init(value: String?) {
+        self.value = value
+    }
+}
 
