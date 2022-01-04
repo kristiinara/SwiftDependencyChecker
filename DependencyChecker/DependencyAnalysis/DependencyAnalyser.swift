@@ -12,11 +12,10 @@ class DependencyAnalyser {
     var url: URL
     var folder: URL
     var changed = false
+    let settings: Settings
     
-    init() {
-        let home = FileManager.default.homeDirectoryForCurrentUser
-        self.folder = home.appendingPathComponent("DependencyInfo", isDirectory: true)
-        
+    init(settings: Settings) {
+        self.folder = settings.homeFolder
         self.url = self.folder.appendingPathComponent("translation.json")
         
         if let data = try? Data(contentsOf: url) {
@@ -29,6 +28,7 @@ class DependencyAnalyser {
         } else {
             translations = Translations(lastUpdated: Date(), translations: [:])
         }
+        self.settings = settings
     }
     
     deinit {

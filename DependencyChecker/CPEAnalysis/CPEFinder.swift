@@ -13,11 +13,10 @@ class CPEFinder {
     var url: URL
     var folder: URL
     var changed = false
+    let settings: Settings
     
-    init() {
-        let home = FileManager.default.homeDirectoryForCurrentUser
-        self.folder = home.appendingPathComponent("DependencyInfo", isDirectory: true)
-        
+    init(settings: Settings) {
+        self.folder = settings.homeFolder
         self.url = self.folder.appendingPathComponent("cpes.json")
         
         if let data = try? Data(contentsOf: url) {
@@ -30,6 +29,8 @@ class CPEFinder {
         } else {
             cpeDictionary = CPEDictionary(lastUpdated: Date())
         }
+        
+        self.settings = settings
     }
     
     deinit {

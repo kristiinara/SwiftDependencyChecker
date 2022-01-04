@@ -35,7 +35,7 @@ struct Application: ParsableCommand {
         abstract: "DependencyChecker is a tool that analyses project dependencies declared in Carthage, CocoaPods and Swift Package manager. The dependent libraries are identified, then the NVD database is queried to check if the libraries and library versions used are vulnerable.",
         // Commands can define a version for automatic '--version' support.
         version: "0.0.1",
-        subcommands: [Analyse.self, Setup.self],
+        subcommands: [Analyse.self, ToolSettings.self],
 
         // A default subcommand, when provided, is automatically selected if a
         // subcommand is not given on the command line.
@@ -67,10 +67,12 @@ struct Application: ParsableCommand {
         mutating func run() {
             print("path: \(path)")
             
+            let settings = Settings()
+            
             switch action {
             case .all:
                 print("action: all")
-                let analyser = DependencyChecker()
+                let analyser = DependencyChecker(settings: settings)
                 let vulnerableVersionsUsed = analyser.analyseFolder(path: path)
                 
                 for vulnerableVersion in vulnerableVersionsUsed {
@@ -85,7 +87,7 @@ struct Application: ParsableCommand {
                     }
                 }
             case .sourceanalysis:
-                let analyser = DependencyChecker()
+                let analyser = DependencyChecker(settings: settings)
                 let vulnerableVersionsUsed = analyser.analyseFolder(path: path)
                 
                 /*
@@ -109,7 +111,7 @@ struct Application: ParsableCommand {
                 }
             case .dependencies:
                 print("action: dependencies")
-                let analyser = DependencyAnalyser()
+                let analyser = DependencyAnalyser(settings: settings)
                 let libraries = analyser.analyseApp(folderPath: path)
                 print("Dependencies: ")
                 for library in libraries {
@@ -130,7 +132,7 @@ struct Application: ParsableCommand {
                 }
             case .findcpe:
                 print("action: findcpe")
-                let analyser = CPEFinder()
+                let analyser = CPEFinder(settings: settings)
                 if let specificValue = specificValue {
                     print("For library name: \(specificValue)")
                     if let cpe = analyser.findCPEForLibrary(name: specificValue) {
@@ -143,7 +145,7 @@ struct Application: ParsableCommand {
                 }
             case .querycve:
                 print("action: querycve")
-                let analyser = VulnerabilityAnalyser()
+                let analyser = VulnerabilityAnalyser(settings: settings)
                 if let specificValue = specificValue {
                     print("Vulnerabilities for cpe: \(specificValue)")
                     //TODO: check if cpe has correct format??
@@ -184,9 +186,82 @@ struct Application: ParsableCommand {
         }
     }
     
-    struct Setup: ParsableCommand {
+    struct ToolSettings: ParsableCommand {
+        enum Action: String, ExpressibleByArgument {
+            case get, set, displayall
+        }
+        @Option(help: "Action to take. Dependencies detects the dependencies declared. Findcpe finds the corresponding cpe for each library, querycve queries cve-s from NVD database.")
+        var action: Action = .displayall
+        
+        
+        enum Property: String, ExpressibleByArgument {
+            case homeFolder, specTimeInterval, cpeTimeInterval, vulnerabilityTimeInterval
+        }
+        @Option(help: "which value to set or get")
+        var property: Property?
+        
+        @Option(help: "which value to set or get")
+        var value: String?
+        
         mutating func run() {
-            print("Setup -- not yet implemented")
+            var settingsController = SettingsController()
+            
+            print("Settings")
+            switch action {
+            case .get:
+                if let property = property {
+                    switch property {
+                    case .homeFolder:
+                        print("\(settingsController.settings.homeFolder)")
+                    case .specTimeInterval:
+                        print("\(settingsController.settings.specTranslationTimeInterval)")
+                    case .cpeTimeInterval:
+                        print("\(settingsController.settings.cpeTimeInterval)")
+                    case .vulnerabilityTimeInterval:
+                        print("\(settingsController.settings.vulnerabilityTimeInterval)")
+                    }
+                } else {
+                    print("Property not defined.")
+                }
+            case .set:
+                if let property = property, let value = value {
+                    switch property {
+                    case .homeFolder:
+                        let url = URL(fileURLWithPath: value)
+                        settingsController.folder = url
+                        settingsController.settings.homeFolder = url
+                        settingsController.changed = true
+                    case .specTimeInterval:
+                        if let timeInterval = TimeInterval(value) {
+                            settingsController.settings.specTranslationTimeInterval = timeInterval
+                            settingsController.changed = true
+                        } else {
+                            print("Value \(value) not a time interval.")
+                        }
+                    case .cpeTimeInterval:
+                        if let timeInterval = TimeInterval(value) {
+                            settingsController.settings.cpeTimeInterval = timeInterval
+                            settingsController.changed = true
+                        } else {
+                            print("Value \(value) not a time interval.")
+                        }
+                    case .vulnerabilityTimeInterval:
+                        if let timeInterval = TimeInterval(value) {
+                            settingsController.settings.vulnerabilityTimeInterval = timeInterval
+                            settingsController.changed = true
+                        } else {
+                            print("Value \(value) not a time interval.")
+                        }
+                    }
+                } else {
+                    print("Property or value not defined.")
+                }
+            case .displayall:
+                print("Homefolder: \(settingsController.settings.homeFolder)")
+                print("TimeInterval for spec analysis: \(settingsController.settings.specTranslationTimeInterval)")
+                print("TimeInterval for cpe analysis: \(settingsController.settings.cpeTimeInterval)")
+                print("TimeInterval for vulnerability analysis: \(settingsController.settings.vulnerabilityTimeInterval)")
+            }
         }
     }
 }

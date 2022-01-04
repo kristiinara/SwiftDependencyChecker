@@ -9,10 +9,16 @@ import Foundation
 import os.log
 
 class DependencyChecker {
+    let settings: Settings
+    
+    init(settings: Settings) {
+        self.settings = settings
+    }
+    
     func analyseFolder(path: String) -> [(library: Library, vulnerability: CVEData)] {
         
         // find all dependencies:
-        let analyser = DependencyAnalyser()
+        let analyser = DependencyAnalyser(settings: settings)
         let libraries = analyser.analyseApp(folderPath: path)
         os_log("Dependencies: ")
         for library in libraries {
@@ -47,7 +53,7 @@ class DependencyChecker {
             analysedLibraries.append(newAnalysedLibrary)
         }
         
-        let cpeFinder = CPEFinder()
+        let cpeFinder = CPEFinder(settings: settings)
         for analysedLibrary in analysedLibraries {
             if let cpe = cpeFinder.findCPEForLibrary(name: analysedLibrary.name) {
                 analysedLibrary.cpe = cpe
@@ -56,7 +62,7 @@ class DependencyChecker {
         }
         
         // query vulnerabilities for each found cpe
-        let vulnerabilityAnalyser = VulnerabilityAnalyser()
+        let vulnerabilityAnalyser = VulnerabilityAnalyser(settings: settings)
         for analysedLibrary in analysedLibraries {
             if let cpe = analysedLibrary.cpe {
                 let cveData = vulnerabilityAnalyser.queryVulnerabilitiesFor(cpe: cpe)

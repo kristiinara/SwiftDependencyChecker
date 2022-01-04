@@ -15,6 +15,7 @@
 		4A387EF72781AA7A0063B494 /* VulnerabilityAnalyser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387EF62781AA7A0063B494 /* VulnerabilityAnalyser.swift */; };
 		4A8F79452781B1DC0089DCB8 /* DependencyChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A8F79442781B1DC0089DCB8 /* DependencyChecker.swift */; };
 		4AE3143127832161000DA297 /* SourceAnalyser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE3143027832161000DA297 /* SourceAnalyser.swift */; };
+		4AE314362784785E000DA297 /* SettingsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE314352784785E000DA297 /* SettingsController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -40,6 +41,7 @@
 		4A387EF62781AA7A0063B494 /* VulnerabilityAnalyser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VulnerabilityAnalyser.swift; sourceTree = "<group>"; };
 		4A8F79442781B1DC0089DCB8 /* DependencyChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyChecker.swift; sourceTree = "<group>"; };
 		4AE3143027832161000DA297 /* SourceAnalyser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceAnalyser.swift; sourceTree = "<group>"; };
+		4AE314352784785E000DA297 /* SettingsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +59,7 @@
 		4A387EC3277F3C560063B494 = {
 			isa = PBXGroup;
 			children = (
+				4AE314352784785E000DA297 /* SettingsController.swift */,
 				4A387ECE277F3C560063B494 /* DependencyChecker */,
 				4A387EDB277F3CC40063B494 /* Frameworks */,
 				4A387ECD277F3C560063B494 /* Products */,
@@ -189,6 +192,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4AE314362784785E000DA297 /* SettingsController.swift in Sources */,
 				4A387EEF278096DE0063B494 /* DependencyAnalyser.swift in Sources */,
 				4A387ED0277F3C560063B494 /* main.swift in Sources */,
 				4A387EF42781A4840063B494 /* CPEFinder.swift in Sources */,
