@@ -358,7 +358,11 @@ class DependencyAnalyser {
                 }
                 
                 let version = components[2].replacingOccurrences(of: "\"", with: "")
-                libraries.append(Library(name: name, versionString: version))
+                
+                let library = Library(name: name, versionString: version)
+                library.platform = "carthage"
+                
+                libraries.append(library)
             }
         } catch {
             os_log("could not read carthage file \(path)")
@@ -486,6 +490,7 @@ class DependencyAnalyser {
                     library.directDependency = direct
                     library.subtarget = subspec
                     library.module = module
+                    library.platform = "cocoapods"
                     
                     libraries.append(library)
                     
@@ -523,7 +528,10 @@ class DependencyAnalyser {
                                 version = state["version"] as? String
                             }
                             
-                            libraries.append(Library(name: name ?? "??", versionString: version ?? "??"))
+                            let library = Library(name: name ?? "??", versionString: version ?? "??")
+                            library.platform = "swiftpm"
+                            
+                            libraries.append(library)
                         }
                     }
                 }
@@ -686,7 +694,8 @@ class Library: Codable {
     var subtarget: String?
     let versionString: String
     var directDependency: Bool? = nil
-    var module: String? 
+    var module: String?
+    var platform: String?
     
     init(name: String, versionString: String) {
         self.name = name.lowercased()
