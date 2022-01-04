@@ -8,16 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		4A387ED0277F3C560063B494 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387ECF277F3C560063B494 /* main.swift */; };
-		4A387EDD277F3CC40063B494 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A387EDC277F3CC40063B494 /* Cocoa.framework */; };
-		4A387EDF277F3CC40063B494 /* XcodeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A387EDE277F3CC40063B494 /* XcodeKit.framework */; };
-		4A387EE2277F3CC40063B494 /* SourceEditorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387EE1277F3CC40063B494 /* SourceEditorExtension.swift */; };
-		4A387EE4277F3CC40063B494 /* SourceEditorCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387EE3277F3CC40063B494 /* SourceEditorCommand.swift */; };
 		4A387EEC27808FA10063B494 /* ArgumentParser in Frameworks */ = {isa = PBXBuildFile; productRef = 4A387EEB27808FA10063B494 /* ArgumentParser */; };
 		4A387EEF278096DE0063B494 /* DependencyAnalyser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387EEE278096DE0063B494 /* DependencyAnalyser.swift */; };
 		4A387EF1278097930063B494 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387EF0278097930063B494 /* Helper.swift */; };
 		4A387EF42781A4840063B494 /* CPEFinder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387EF32781A4840063B494 /* CPEFinder.swift */; };
 		4A387EF72781AA7A0063B494 /* VulnerabilityAnalyser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A387EF62781AA7A0063B494 /* VulnerabilityAnalyser.swift */; };
 		4A8F79452781B1DC0089DCB8 /* DependencyChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A8F79442781B1DC0089DCB8 /* DependencyChecker.swift */; };
+		4AE3143127832161000DA297 /* SourceAnalyser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AE3143027832161000DA297 /* SourceAnalyser.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -35,18 +32,14 @@
 /* Begin PBXFileReference section */
 		4A387ECC277F3C560063B494 /* DependencyChecker */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DependencyChecker; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A387ECF277F3C560063B494 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		4A387EDA277F3CC40063B494 /* XCodeDependencyChecker.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = XCodeDependencyChecker.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A387EDC277F3CC40063B494 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		4A387EDE277F3CC40063B494 /* XcodeKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XcodeKit.framework; path = Library/Frameworks/XcodeKit.framework; sourceTree = DEVELOPER_DIR; };
-		4A387EE1277F3CC40063B494 /* SourceEditorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceEditorExtension.swift; sourceTree = "<group>"; };
-		4A387EE3277F3CC40063B494 /* SourceEditorCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceEditorCommand.swift; sourceTree = "<group>"; };
-		4A387EE5277F3CC40063B494 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4A387EE6277F3CC40063B494 /* XCodeDependencyChecker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = XCodeDependencyChecker.entitlements; sourceTree = "<group>"; };
 		4A387EEE278096DE0063B494 /* DependencyAnalyser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyAnalyser.swift; sourceTree = "<group>"; };
 		4A387EF0278097930063B494 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		4A387EF32781A4840063B494 /* CPEFinder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CPEFinder.swift; sourceTree = "<group>"; };
 		4A387EF62781AA7A0063B494 /* VulnerabilityAnalyser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VulnerabilityAnalyser.swift; sourceTree = "<group>"; };
 		4A8F79442781B1DC0089DCB8 /* DependencyChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DependencyChecker.swift; sourceTree = "<group>"; };
+		4AE3143027832161000DA297 /* SourceAnalyser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceAnalyser.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,15 +51,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4A387ED7277F3CC40063B494 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				4A387EDD277F3CC40063B494 /* Cocoa.framework in Frameworks */,
-				4A387EDF277F3CC40063B494 /* XcodeKit.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -74,7 +58,6 @@
 			isa = PBXGroup;
 			children = (
 				4A387ECE277F3C560063B494 /* DependencyChecker */,
-				4A387EE0277F3CC40063B494 /* XCodeDependencyChecker */,
 				4A387EDB277F3CC40063B494 /* Frameworks */,
 				4A387ECD277F3C560063B494 /* Products */,
 			);
@@ -84,7 +67,6 @@
 			isa = PBXGroup;
 			children = (
 				4A387ECC277F3C560063B494 /* DependencyChecker */,
-				4A387EDA277F3CC40063B494 /* XCodeDependencyChecker.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -92,6 +74,7 @@
 		4A387ECE277F3C560063B494 /* DependencyChecker */ = {
 			isa = PBXGroup;
 			children = (
+				4AE3142F2783214E000DA297 /* SourceAnalysis */,
 				4A387EF52781AA670063B494 /* VulnerabilityAnalysis */,
 				4A387EF22781A46B0063B494 /* CPEAnalysis */,
 				4A387EED278096CA0063B494 /* DependencyAnalysis */,
@@ -109,17 +92,6 @@
 				4A387EDE277F3CC40063B494 /* XcodeKit.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		4A387EE0277F3CC40063B494 /* XCodeDependencyChecker */ = {
-			isa = PBXGroup;
-			children = (
-				4A387EE1277F3CC40063B494 /* SourceEditorExtension.swift */,
-				4A387EE3277F3CC40063B494 /* SourceEditorCommand.swift */,
-				4A387EE5277F3CC40063B494 /* Info.plist */,
-				4A387EE6277F3CC40063B494 /* XCodeDependencyChecker.entitlements */,
-			);
-			path = XCodeDependencyChecker;
 			sourceTree = "<group>";
 		};
 		4A387EED278096CA0063B494 /* DependencyAnalysis */ = {
@@ -146,6 +118,14 @@
 			path = VulnerabilityAnalysis;
 			sourceTree = "<group>";
 		};
+		4AE3142F2783214E000DA297 /* SourceAnalysis */ = {
+			isa = PBXGroup;
+			children = (
+				4AE3143027832161000DA297 /* SourceAnalyser.swift */,
+			);
+			path = SourceAnalysis;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -169,23 +149,6 @@
 			productReference = 4A387ECC277F3C560063B494 /* DependencyChecker */;
 			productType = "com.apple.product-type.tool";
 		};
-		4A387ED9277F3CC40063B494 /* XCodeDependencyChecker */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 4A387EE7277F3CC40063B494 /* Build configuration list for PBXNativeTarget "XCodeDependencyChecker" */;
-			buildPhases = (
-				4A387ED6277F3CC40063B494 /* Sources */,
-				4A387ED7277F3CC40063B494 /* Frameworks */,
-				4A387ED8277F3CC40063B494 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = XCodeDependencyChecker;
-			productName = XCodeDependencyChecker;
-			productReference = 4A387EDA277F3CC40063B494 /* XCodeDependencyChecker.appex */;
-			productType = "com.apple.product-type.xcode-extension";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -196,9 +159,6 @@
 				LastUpgradeCheck = 1250;
 				TargetAttributes = {
 					4A387ECB277F3C560063B494 = {
-						CreatedOnToolsVersion = 12.5.1;
-					};
-					4A387ED9277F3CC40063B494 = {
 						CreatedOnToolsVersion = 12.5.1;
 					};
 				};
@@ -220,20 +180,9 @@
 			projectRoot = "";
 			targets = (
 				4A387ECB277F3C560063B494 /* DependencyChecker */,
-				4A387ED9277F3CC40063B494 /* XCodeDependencyChecker */,
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXResourcesBuildPhase section */
-		4A387ED8277F3CC40063B494 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4A387EC8277F3C560063B494 /* Sources */ = {
@@ -245,16 +194,8 @@
 				4A387EF42781A4840063B494 /* CPEFinder.swift in Sources */,
 				4A387EF72781AA7A0063B494 /* VulnerabilityAnalyser.swift in Sources */,
 				4A8F79452781B1DC0089DCB8 /* DependencyChecker.swift in Sources */,
+				4AE3143127832161000DA297 /* SourceAnalyser.swift in Sources */,
 				4A387EF1278097930063B494 /* Helper.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		4A387ED6277F3CC40063B494 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				4A387EE2277F3CC40063B494 /* SourceEditorExtension.swift in Sources */,
-				4A387EE4277F3CC40063B494 /* SourceEditorCommand.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -382,6 +323,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = SZNL2M84RE;
 				ENABLE_HARDENED_RUNTIME = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestrisolutions.DependencyChecker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
@@ -393,49 +335,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = SZNL2M84RE;
 				ENABLE_HARDENED_RUNTIME = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestrisolutions.DependencyChecker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-			};
-			name = Release;
-		};
-		4A387EE8277F3CC40063B494 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = XCodeDependencyChecker/XCodeDependencyChecker.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = SZNL2M84RE;
-				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = XCodeDependencyChecker/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@executable_path/../../../../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.nestrisolutions.XCodeDependencyChecker;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 5.0;
-			};
-			name = Debug;
-		};
-		4A387EE9277F3CC40063B494 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = XCodeDependencyChecker/XCodeDependencyChecker.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = SZNL2M84RE;
-				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = XCodeDependencyChecker/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@executable_path/../../../../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.nestrisolutions.XCodeDependencyChecker;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -457,15 +358,6 @@
 			buildConfigurations = (
 				4A387ED4277F3C560063B494 /* Debug */,
 				4A387ED5277F3C560063B494 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		4A387EE7277F3CC40063B494 /* Build configuration list for PBXNativeTarget "XCodeDependencyChecker" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				4A387EE8277F3CC40063B494 /* Debug */,
-				4A387EE9277F3CC40063B494 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

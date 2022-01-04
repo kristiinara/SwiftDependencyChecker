@@ -8,7 +8,56 @@ import Foundation
 import os.log
 
 class DependencyAnalyser {
-    var libraryDictionary: [String: (name: String, path: String?, versions: [String:String])] = [:]
+    var translations: Translations
+    var url: URL
+    var folder: URL
+    var changed = false
+    
+    init() {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        self.folder = home.appendingPathComponent("DependencyInfo", isDirectory: true)
+        
+        self.url = self.folder.appendingPathComponent("translation.json")
+        
+        if let data = try? Data(contentsOf: url) {
+            let decoder = JSONDecoder()
+            if let decoded = try? decoder.decode(Translations.self, from: data) {
+                translations = decoded
+            } else {
+                translations = Translations(lastUpdated: Date(), translations: [:])
+            }
+        } else {
+            translations = Translations(lastUpdated: Date(), translations: [:])
+        }
+    }
+    
+    deinit {
+        if changed {
+            save()
+        }
+    }
+    
+    func save() {
+        if !FileManager.default.fileExists(atPath: self.folder.absoluteString) {
+            do {
+                try FileManager.default.createDirectory(at: self.folder, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                os_log("Could not create folder: \(self.folder)")
+            }
+        }
+        
+        let encoder = JSONEncoder()
+        if let encoded = try? encoder.encode(translations) {
+            do {
+                try encoded.write(to: url)
+            } catch {
+                os_log("Could not save translations")
+            }
+        }
+    }
+    
+    //libraryDictionary: [String: (name: String, path: String?, versions: [String:String])] = [:]
+    
     
     func getNameFromGitPath(path: String) -> String? {
         var libraryName: String? = nil
@@ -21,6 +70,10 @@ class DependencyAnalyser {
         if var foundName = libraryName {
             foundName = foundName.lowercased()
             foundName.removeFirst()
+            foundName = foundName.trimmingCharacters(in: .whitespacesAndNewlines)
+            foundName = foundName.replacingOccurrences(of: "\"", with: "")
+            foundName = foundName.replacingOccurrences(of: ",", with: "")
+            
             libraryName = foundName
         }
         
@@ -36,11 +89,20 @@ class DependencyAnalyser {
         let specDirectory = "\(currentDirectory)/ExternalAnalysers/Specs/Specs" // TODO: check that the repo actually exists + refresh?
         //os_log("specpath: \(specDirectory)")
         
-        if var translation = libraryDictionary[name] {
-            if let translatedVersion = translation.versions[version] {
-                return (name:translation.name, module: translation.name, version: translatedVersion)
+        if var translation = self.translations.translations[name] {
+            if translation.noTranslation {
+                return nil
+            }
+            
+            if let translatedVersion = translation.translatedVersions[version] {
+                if let libraryName = translation.libraryName {
+                    return (name:libraryName, module: libraryName, version: translatedVersion)
+                } else {
+                    return nil
+                }
+                
             } else {
-                if let path = translation.path {
+                if let path = translation.specFolderPath {
                     let enumerator = FileManager.default.enumerator(atPath: path)
                     var podSpecPath: String? = nil
                     while let filename = enumerator?.nextObject() as? String {
@@ -71,21 +133,29 @@ class DependencyAnalyser {
                             
                             let gitPath = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"git\":", "\(path)/\(filename)"])
                             
-                            let libraryName = getNameFromGitPath(path: gitPath)
+                            var libraryName = getNameFromGitPath(path: gitPath)
                             
                             if newVersion != "" && tag != "" {
-                                translation.versions[version] = newVersion
+                                translation.translatedVersions[version] = newVersion
                             }
                             
-                            if var libraryName = libraryName {
-                                libraryName = libraryName.trimmingCharacters(in: .whitespacesAndNewlines)
-                                libraryName = libraryName.replacingOccurrences(of: "\"", with: "")
-                                libraryName = libraryName.replacingOccurrences(of: ",", with: "")
+                            if var newLibraryName = libraryName {
+                                libraryName = newLibraryName.trimmingCharacters(in: .whitespacesAndNewlines)
+                                libraryName = newLibraryName.replacingOccurrences(of: "\"", with: "")
+                                libraryName = newLibraryName.replacingOccurrences(of: ",", with: "")
                                 
-                                translation.name = libraryName
+                                libraryName = newLibraryName
                             }
-                            libraryDictionary[name] = translation
-                            return (name: translation.name, module: module, version: newVersion)
+                            
+                            translation.libraryName = libraryName
+                            self.translations.translations[name] = translation
+                            self.changed = true
+                            
+                            if let libraryName = libraryName {
+                                return (name: libraryName, module: module, version: newVersion)
+                            } else {
+                                return nil
+                            }
                         }
                         
                         if let podSpecPath = podSpecPath {
@@ -108,10 +178,11 @@ class DependencyAnalyser {
                                 libraryName = libraryName.replacingOccurrences(of: "\"", with: "")
                                 libraryName = libraryName.replacingOccurrences(of: ",", with: "")
                                 
-                                translation.name = libraryName
-                                libraryDictionary[name] = translation
+                                translation.libraryName = libraryName
+                                self.translations.translations[name] = translation
+                                self.changed = true
                                 
-                                return (name: translation.name, module: module, version: nil)
+                                return (name: libraryName, module: module, version: nil)
                             }
                         }
                     }
@@ -119,7 +190,9 @@ class DependencyAnalyser {
                     return nil // it was a null translation for speed purposes
                 }
                 
-                return (name: translation.name, translation.name, version: nil)
+                if let libraryName = translation.libraryName {
+                    return (name: libraryName, module: libraryName, version: nil)
+                }
             }
         } else {
             //find library in specs
@@ -128,7 +201,12 @@ class DependencyAnalyser {
                 //os_log(filename)
                 if filename.lowercased().hasSuffix("/\(name)") {
                     os_log("found: \(filename)")
-                    libraryDictionary[name] = (name: name, path: "\(specDirectory)/\(filename)", versions: [:])
+                    
+                    var translation = Translation(podspecName: name)
+                    translation.specFolderPath = "\(specDirectory)/\(filename)"
+                    translations.translations[name] = translation
+                    self.changed = true
+                    
                     return translateLibraryVersion(name: name, version: version)
                 }
                 
@@ -137,7 +215,10 @@ class DependencyAnalyser {
                 }
             }
             
-            libraryDictionary[name] = (name: name, path: nil, versions: [:]) // add null translation to speed up project analysis for projects that have many dependencies that cannot be found in cocoapods
+            var translation = Translation(podspecName: name)
+            translation.noTranslation = true
+            self.changed = true
+            // add null translation to speed up project analysis for projects that have many dependencies that cannot be found in cocoapods
         }
         /*
          cocoaPodsName:
@@ -520,7 +601,39 @@ class DependencyAnalyser {
     
 }
 
-class Library {
+class Translations: Codable {
+    var lastUpdated: Date
+    var translations: [String: Translation]
+    
+    init(lastUpdated: Date, translations: [String: Translation]) {
+        self.lastUpdated = lastUpdated
+        self.translations = translations
+    }
+}
+
+class Translation: Codable {
+    var podspecName: String
+    var gitPath: String?
+    var libraryName: String?
+    var moduleName: String?
+    var specFolderPath: String?
+    var translatedVersions: [String:String] = [:]
+    var noTranslation: Bool = false
+    
+    init(podspecName: String) {
+        self.podspecName = podspecName
+    }
+}
+
+class Project: Codable {
+    var usedLibraries: [Library]
+    
+    init(usedLibraries: [Library]) {
+        self.usedLibraries = usedLibraries
+    }
+}
+
+class Library: Codable {
     let name: String
     var subtarget: String?
     let versionString: String
