@@ -37,7 +37,7 @@ class DependencyAnalyser {
         }
     }
     
-    func save() {
+    func checkFolder() {
         if !FileManager.default.fileExists(atPath: self.folder.absoluteString) {
             do {
                 try FileManager.default.createDirectory(at: self.folder, withIntermediateDirectories: true, attributes: nil)
@@ -45,6 +45,10 @@ class DependencyAnalyser {
                 os_log("Could not create folder: \(self.folder)")
             }
         }
+    }
+    
+    func save() {
+        self.checkFolder()
         
         let encoder = JSONEncoder()
         if let encoded = try? encoder.encode(translations) {
@@ -54,6 +58,39 @@ class DependencyAnalyser {
                 os_log("Could not save translations")
             }
         }
+    }
+    
+    func saveLibraries(path: String, libraries: [Library]) {
+        self.checkFolder()
+        
+        let projectsUrl = self.folder.appendingPathComponent("projects.json")
+        var projects: Projects? = nil
+        
+        if let data = try? Data(contentsOf: projectsUrl) {
+            let decoder = JSONDecoder()
+            if let decoded = try? decoder.decode(Projects.self, from: data) {
+                projects = decoded
+            }
+        }
+        
+        if projects == nil{
+            projects = Projects()
+        }
+        
+        projects?.usedLibraries[path] = libraries
+        
+        if let projects = projects {
+            let encoder = JSONEncoder()
+            if let encoded = try? encoder.encode(projects) {
+                do {
+                    try encoded.write(to: projectsUrl)
+                } catch {
+                    os_log("Could not save projects")
+                }
+            }
+        }
+        
+        
     }
     
     //libraryDictionary: [String: (name: String, path: String?, versions: [String:String])] = [:]
@@ -80,7 +117,7 @@ class DependencyAnalyser {
         return libraryName
     }
         
-    func translateLibraryVersion(name: String, version: String) -> (name: String, module: String, version: String?)? {
+    func translateLibraryVersion(name: String, version: String) -> (name: String, module: String?, version: String?)? {
         os_log("translate library name: \(name), version: \(version)")
         
        // let currentDirectory = FileManager.default.currentDirectoryPath
@@ -125,12 +162,20 @@ class DependencyAnalyser {
                             tag = tag.replacingOccurrences(of: "\"", with: "")
                             tag = tag.replacingOccurrences(of: ",", with: "")
                             
-                            var module = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"module_name\":", "\(path)/\(filename)"])
-                            module = module.trimmingCharacters(in: .whitespacesAndNewlines)
-                            module = module.replacingOccurrences(of: "\"module_name\": ", with: "")
-                            module = module.replacingOccurrences(of: "\"", with: "")
-                            module = module.replacingOccurrences(of: ",", with: "")
                             
+                            var moduleString = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"module_name\":", "\(path)/\(filename)"])
+                            moduleString = moduleString.trimmingCharacters(in: .whitespacesAndNewlines)
+                            moduleString = moduleString.replacingOccurrences(of: "\"module_name\": ", with: "")
+                            moduleString = moduleString.replacingOccurrences(of: "\"", with: "")
+                            moduleString = moduleString.replacingOccurrences(of: ",", with: "")
+                            
+                            var module: String?
+                            if moduleString == "" {
+                                module = nil
+                            } else {
+                                module = moduleString
+                            }
+ 
                             let gitPath = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"git\":", "\(path)/\(filename)"])
                             
                             var libraryName = getNameFromGitPath(path: gitPath)
@@ -157,33 +202,38 @@ class DependencyAnalyser {
                                 return nil
                             }
                         }
+                    }
+                    if let podSpecPath = podSpecPath {
+                        os_log("parse podSpecPath: \(podSpecPath)")
+                        var libraryName: String? = nil
                         
-                        if let podSpecPath = podSpecPath {
-                            os_log("parse podSpecPath: \(podSpecPath)")
-                            var libraryName: String? = nil
+                        let gitPath = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"git\":", "\(podSpecPath)"])
+                        os_log("found gitPath: \(gitPath)")
+                        
+                        libraryName = getNameFromGitPath(path: gitPath)
+                        
+                        var moduleString = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"module_name\":", "\(podSpecPath)"])
+                        moduleString = moduleString.trimmingCharacters(in: .whitespacesAndNewlines)
+                        moduleString = moduleString.replacingOccurrences(of: "\"module_name\": ", with: "")
+                        moduleString = moduleString.replacingOccurrences(of: "\"", with: "")
+                        moduleString = moduleString.replacingOccurrences(of: ",", with: "")
+                        var module: String?
+                        if moduleString == "" {
+                            module = nil
+                        } else {
+                            module = moduleString
+                        }
+                        
+                        if var libraryName = libraryName {
+                            libraryName = libraryName.trimmingCharacters(in: .whitespacesAndNewlines)
+                            libraryName = libraryName.replacingOccurrences(of: "\"", with: "")
+                            libraryName = libraryName.replacingOccurrences(of: ",", with: "")
                             
-                            let gitPath = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"git\":", "\(podSpecPath)"])
-                            os_log("found gitPath: \(gitPath)")
+                            translation.libraryName = libraryName
+                            self.translations.translations[name] = translation
+                            self.changed = true
                             
-                            libraryName = getNameFromGitPath(path: gitPath)
-                            
-                            var module = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"module_name\":", "\(podSpecPath)"])
-                            module = module.trimmingCharacters(in: .whitespacesAndNewlines)
-                            module = module.replacingOccurrences(of: "\"module_name\": ", with: "")
-                            module = module.replacingOccurrences(of: "\"", with: "")
-                            module = module.replacingOccurrences(of: ",", with: "")
-                            
-                            if var libraryName = libraryName {
-                                libraryName = libraryName.trimmingCharacters(in: .whitespacesAndNewlines)
-                                libraryName = libraryName.replacingOccurrences(of: "\"", with: "")
-                                libraryName = libraryName.replacingOccurrences(of: ",", with: "")
-                                
-                                translation.libraryName = libraryName
-                                self.translations.translations[name] = translation
-                                self.changed = true
-                                
-                                return (name: libraryName, module: module, version: nil)
-                            }
+                            return (name: libraryName, module: module, version: nil)
                         }
                     }
                 } else {
@@ -261,6 +311,8 @@ class DependencyAnalyser {
                 allLibraries.append(contentsOf: libraries)
              }
         }
+        
+        self.saveLibraries(path: folderPath, libraries: allLibraries)
         
         return allLibraries
     }
@@ -625,12 +677,8 @@ class Translation: Codable {
     }
 }
 
-class Project: Codable {
-    var usedLibraries: [Library]
-    
-    init(usedLibraries: [Library]) {
-        self.usedLibraries = usedLibraries
-    }
+class Projects: Codable {
+    var usedLibraries: [String: [Library]] = [:]
 }
 
 class Library: Codable {
