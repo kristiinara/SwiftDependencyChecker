@@ -5,6 +5,7 @@
 //  Created by Kristiina Rahkema on 01.01.2022.
 //
 import Foundation
+import os.log
 
 class DependencyAnalyser {
     var libraryDictionary: [String: (name: String, path: String?, versions: [String:String])] = [:]
@@ -26,27 +27,27 @@ class DependencyAnalyser {
         return libraryName
     }
         
-    func translateLibraryVersion(name: String, version: String) -> (name: String, version: String?)? {
-        print("translate library name: \(name), version: \(version)")
+    func translateLibraryVersion(name: String, version: String) -> (name: String, module: String, version: String?)? {
+        os_log("translate library name: \(name), version: \(version)")
         
        // let currentDirectory = FileManager.default.currentDirectoryPath
         let currentDirectory = "/Users/kristiina/Phd/Tools/GraphifyEvolution"
-        //print("currnent directory: \(currentDirectory)")
+        //os_log("currnent directory: \(currentDirectory)")
         let specDirectory = "\(currentDirectory)/ExternalAnalysers/Specs/Specs" // TODO: check that the repo actually exists + refresh?
-        //print("specpath: \(specDirectory)")
+        //os_log("specpath: \(specDirectory)")
         
         if var translation = libraryDictionary[name] {
             if let translatedVersion = translation.versions[version] {
-                return (name:translation.name, version: translatedVersion)
+                return (name:translation.name, module: translation.name, version: translatedVersion)
             } else {
                 if let path = translation.path {
                     let enumerator = FileManager.default.enumerator(atPath: path)
                     var podSpecPath: String? = nil
                     while let filename = enumerator?.nextObject() as? String {
-                        print(filename)
+                        os_log("\(filename)")
                         if filename.hasSuffix("podspec.json") {
                             podSpecPath = "\(path)/\(filename)"
-                            print("set podspecpath: \(podSpecPath)")
+                            os_log("\(podSpecPath!)")
                         }
                         
                         if filename.lowercased().hasPrefix("\(version)/") && filename.hasSuffix("podspec.json"){
@@ -61,6 +62,12 @@ class DependencyAnalyser {
                             tag = tag.replacingOccurrences(of: "\"version\": ", with: "")
                             tag = tag.replacingOccurrences(of: "\"", with: "")
                             tag = tag.replacingOccurrences(of: ",", with: "")
+                            
+                            var module = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"module_name\":", "\(path)/\(filename)"])
+                            module = module.trimmingCharacters(in: .whitespacesAndNewlines)
+                            module = module.replacingOccurrences(of: "\"module_name\": ", with: "")
+                            module = module.replacingOccurrences(of: "\"", with: "")
+                            module = module.replacingOccurrences(of: ",", with: "")
                             
                             let gitPath = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"git\":", "\(path)/\(filename)"])
                             
@@ -78,17 +85,23 @@ class DependencyAnalyser {
                                 translation.name = libraryName
                             }
                             libraryDictionary[name] = translation
-                            return (name: translation.name, version: newVersion)
+                            return (name: translation.name, module: module, version: newVersion)
                         }
                         
                         if let podSpecPath = podSpecPath {
-                            print("parse podSpecPath: \(podSpecPath)")
+                            os_log("parse podSpecPath: \(podSpecPath)")
                             var libraryName: String? = nil
                             
                             let gitPath = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"git\":", "\(podSpecPath)"])
-                            print("found gitPath: \(gitPath)")
+                            os_log("found gitPath: \(gitPath)")
                             
                             libraryName = getNameFromGitPath(path: gitPath)
+                            
+                            var module = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"module_name\":", "\(podSpecPath)"])
+                            module = module.trimmingCharacters(in: .whitespacesAndNewlines)
+                            module = module.replacingOccurrences(of: "\"module_name\": ", with: "")
+                            module = module.replacingOccurrences(of: "\"", with: "")
+                            module = module.replacingOccurrences(of: ",", with: "")
                             
                             if var libraryName = libraryName {
                                 libraryName = libraryName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -98,7 +111,7 @@ class DependencyAnalyser {
                                 translation.name = libraryName
                                 libraryDictionary[name] = translation
                                 
-                                return (name: translation.name, version: nil)
+                                return (name: translation.name, module: module, version: nil)
                             }
                         }
                     }
@@ -106,15 +119,15 @@ class DependencyAnalyser {
                     return nil // it was a null translation for speed purposes
                 }
                 
-                return (name: translation.name, version: nil)
+                return (name: translation.name, translation.name, version: nil)
             }
         } else {
             //find library in specs
             let enumerator = FileManager.default.enumerator(atPath: specDirectory)
             while let filename = enumerator?.nextObject() as? String {
-                //print(filename)
+                //os_log(filename)
                 if filename.lowercased().hasSuffix("/\(name)") {
-                    print("found: \(filename)")
+                    os_log("found: \(filename)")
                     libraryDictionary[name] = (name: name, path: "\(specDirectory)/\(filename)", versions: [:])
                     return translateLibraryVersion(name: name, version: version)
                 }
@@ -146,12 +159,12 @@ class DependencyAnalyser {
         dependencyFiles.append(findCarthageFile(homePath: folderPath))
         dependencyFiles.append(findSwiftPMFile(homePath: folderPath))
 
-        print("dependencyFiles: \(dependencyFiles)")
+        os_log("dependencyFiles: \(dependencyFiles)")
         
         for dependencyFile in dependencyFiles {
             if dependencyFile.used {
                 if !dependencyFile.resolved {
-                    print("Dependency \(dependencyFile.type) defined, but not resolved.")
+                    os_log("Dependency \(dependencyFile.type.rawValue) defined, but not resolved.")
                     continue
                 }
                 
@@ -172,7 +185,7 @@ class DependencyAnalyser {
     }
     
     func handleCarthageFile(path: String) -> [Library] {
-        print("handle carthage")
+        os_log("handle carthage")
         var libraries: [Library] = []
         do {
             let data = try String(contentsOfFile: path, encoding: .utf8)
@@ -180,7 +193,7 @@ class DependencyAnalyser {
             
             for line in lines {
                 let components = line.components(separatedBy: .whitespaces)
-                print("components: \(components)")
+                os_log("components: \(components)")
                 // components[0] = git, github
                 
                 if components.count != 3 {
@@ -215,20 +228,20 @@ class DependencyAnalyser {
                 libraries.append(Library(name: name, versionString: version))
             }
         } catch {
-            print("could not read carthage file \(path)")
+            os_log("could not read carthage file \(path)")
         }
         
         return libraries
     }
     
     func handlePodsFile(path: String) -> [Library] {
-        print("handle pods")
+        os_log("handle pods")
         var libraries: [Library] = []
         var declaredPods: [String] = []
         do {
             let data = try String(contentsOfFile: path, encoding: .utf8)
             let lines = data.components(separatedBy: .newlines)
-            print("lines: \(lines)")
+            os_log("lines: \(lines)")
             
             // at some point there was a change with intendations in
             
@@ -245,7 +258,7 @@ class DependencyAnalyser {
                     charactersBeforeDash = line.components(separatedBy: "-")[0]
                     break
                 }
-                print("characters before dash: \(charactersBeforeDash)")
+                os_log("characters before dash: \(charactersBeforeDash)")
             }
             
             
@@ -278,7 +291,7 @@ class DependencyAnalyser {
                 }
             }
             
-            print("declared pods: \(declaredPods)")
+            os_log("declared pods: \(declaredPods)")
             
             for var line in lines {
                 if line.starts(with: "DEPENDENCIES:") {
@@ -298,7 +311,7 @@ class DependencyAnalyser {
                     line = line.replacingOccurrences(of: "\(charactersBeforeDash)- ", with: "")
                     let components = line.components(separatedBy: .whitespaces)
                     
-                    print("components: \(components)")
+                    os_log("components: \(components)")
                     
                     if(components.count < 2) {
                         continue
@@ -326,35 +339,38 @@ class DependencyAnalyser {
                         subspec = components.joined(separator: "/")
                     }
                     
+                    var module: String? = nil
                     // translate to same library names and versions as Carthage
                     if let translation = translateLibraryVersion(name: name, version: version) {
                         name = translation.name
                         if let translatedVersion = translation.version {
                             version = translatedVersion
                         }
+                        module = translation.module
                     }
                     
                     let library = Library(name: name, versionString: version)
                     library.directDependency = direct
                     library.subtarget = subspec
+                    library.module = module
                     
                     libraries.append(library)
                     
-                    print("save library, name: \(library.name), version: \(version)")
+                    os_log("save library, name: \(library.name), version: \(version)")
                 } else {
                     // ignore
                     continue
                 }
             }
         } catch {
-            print("could not read pods file \(path)")
+            os_log("could not read pods file \(path)")
         }
         
         return libraries
     }
     
     func handleSwiftPmFile(path: String) -> [Library] {
-        print("handle swiftpm")
+        os_log("handle swiftpm")
         var libraries: [Library] = []
         do {
             let data = try Data(contentsOf: URL(fileURLWithPath: path))
@@ -380,7 +396,7 @@ class DependencyAnalyser {
                 }
             }
         } catch {
-            print("could not read swiftPM file \(path)")
+            os_log("could not read swiftPM file \(path)")
         }
         
         return libraries
@@ -509,6 +525,7 @@ class Library {
     var subtarget: String?
     let versionString: String
     var directDependency: Bool? = nil
+    var module: String? 
     
     init(name: String, versionString: String) {
         self.name = name.lowercased()

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os.log
 
 class DependencyChecker {
     func analyseFolder(path: String) -> [(library: Library, vulnerability: CVEData)] {
@@ -13,7 +14,7 @@ class DependencyChecker {
         // find all dependencies:
         let analyser = DependencyAnalyser()
         let libraries = analyser.analyseApp(folderPath: path)
-        print("Dependencies: ")
+        os_log("Dependencies: ")
         for library in libraries {
             var subTarget = ""
             if let value = library.subtarget {
@@ -22,12 +23,12 @@ class DependencyChecker {
             
             if let direct = library.directDependency {
                 if direct {
-                    print("\(library.name) \(library.versionString)\(subTarget)")
+                    os_log("\(library.name) \(library.versionString)\(subTarget)")
                 } else {
-                    print("Indirect: \(library.name) \(library.versionString)\(subTarget)")
+                    os_log("Indirect: \(library.name) \(library.versionString)\(subTarget)")
                 }
             } else {
-                print("\(library.name) \(library.versionString)\(subTarget)")
+                os_log("\(library.name) \(library.versionString)\(subTarget)")
             }
         }
         
@@ -50,7 +51,7 @@ class DependencyChecker {
         for analysedLibrary in analysedLibraries {
             if let cpe = cpeFinder.findCPEForLibrary(name: analysedLibrary.name) {
                 analysedLibrary.cpe = cpe
-                print("for library \(analysedLibrary.name) found cpe: \(cpe)")
+                os_log("for library \(analysedLibrary.name) found cpe: \(cpe)")
             }
         }
         
@@ -60,7 +61,7 @@ class DependencyChecker {
             if let cpe = analysedLibrary.cpe {
                 let cveData = vulnerabilityAnalyser.queryVulnerabilitiesFor(cpe: cpe)
                 analysedLibrary.vulnerabilities = cveData
-                print("for library: \(analysedLibrary.name) found \(cveData.count) vulnerabilities")
+                os_log("for library: \(analysedLibrary.name) found \(cveData.count) vulnerabilities")
             }
         }
         
@@ -69,7 +70,7 @@ class DependencyChecker {
         var vulnerableVersionsUsed: [(library: Library, vulnerability: CVEData)] = []
         
         for library in analysedLibraries {
-            print("For library \(library.name) following vulnerabilities were found:")
+            os_log("For library \(library.name) following vulnerabilities were found:")
             let versions = library.vulnerableVersionsUsed
             vulnerableVersionsUsed.append(contentsOf: versions)
         }
@@ -161,7 +162,7 @@ class AnalysedLibrary {
                                 }
                             }
                         } else {
-                            print("Cannot parse library version \(library.versionString)")
+                            os_log("Cannot parse library version \(library.versionString)")
                         }
                         
                         vulnerableVersions.append((library: library, vulnerability: vulnerability))

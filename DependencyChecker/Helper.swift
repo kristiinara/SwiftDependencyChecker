@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os.log
 
 class Helper {
     static func shell(launchPath path: String, arguments args: [String]) -> String {
@@ -22,12 +23,12 @@ class Helper {
             return output
         }
         
-        print("Helper.shell did not return anything")
+        os_log("Helper.shell did not return anything")
         return ""
     }
     
     static func shellOptinal(launchPath path: String, arguments args: [String]) -> String? {
-        //print("Helper.shell")
+        //os_log("Helper.shell")
         
         var output: String? = nil
         
@@ -57,7 +58,7 @@ class Helper {
     }
     
     static func shellAsync(launchPath path: String, arguments args: [String], completion: @escaping ((String, Bool) -> Void )){
-        //print("Helper.shell")
+        //os_log("Helper.shell")
         autoreleasepool {
             let task = Process()
             task.launchPath = path

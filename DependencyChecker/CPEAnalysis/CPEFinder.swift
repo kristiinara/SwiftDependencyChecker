@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os.log
 
 class CPEFinder {
     func findCPEForLibrary(name: String) -> String? {
@@ -13,10 +14,10 @@ class CPEFinder {
             let cpePath = "/Users/kristiina/Phd/Tools/GraphifyEvolution/ExternalAnalysers/CPE/official-cpe-dictionary_v2.3.xml"
 
             if FileManager.default.fileExists(atPath: cpePath) {
-                print("cpe for title: \(name)")
+                os_log("cpe for title: \(name)")
                 
                 let output = Helper.shell(launchPath: "/bin/zsh", arguments: ["-c", "grep -A3 -i -e \(name) \(cpePath) | grep \"<cpe-23:cpe23-item name\""])
-                print("cpe output: \(output)")
+                os_log("cpe output: \(output)")
                 if output != "" {
                     let items = output.components(separatedBy: "\n")
                     if items.count > 0 {
@@ -25,22 +26,22 @@ class CPEFinder {
                         if components.count > 0 {
                             first = components.last!
                             first = first.replacingOccurrences(of: "\"/>", with: "")
-                            //print(first)
+                            //os_log(first)
                             
                             var splitValues = first.components(separatedBy: ":")
                             splitValues[5] = "*"
                             let cleanedCpe = "\(splitValues.joined(separator: ":"))"
-                            print("cleaned: \(cleanedCpe)")
+                            os_log("cleaned: \(cleanedCpe)")
                             
                             return cleanedCpe
                         }
                     }
                 }
             } else {
-                print("cpe dictionary not found!")
+                os_log("cpe dictionary not found!")
             }
         } else {
-            print("name does not contain \"/\"")
+            os_log("name does not contain \"/\"")
         }
         
         return nil

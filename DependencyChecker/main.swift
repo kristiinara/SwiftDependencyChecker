@@ -47,7 +47,7 @@ struct Application: ParsableCommand {
         var path: String = FileManager.default.currentDirectoryPath
         
         enum Action: String, ExpressibleByArgument {
-            case all, dependencies, findcpe, querycve
+            case all, dependencies, findcpe, querycve, sourceanalysis
         }
         @Option(help: "Action to take. Dependencies detects the dependencies declared. Findcpe finds the corresponding cpe for each library, querycve queries cve-s from NVD database.")
         var action: Action = .all
@@ -65,6 +65,8 @@ struct Application: ParsableCommand {
         var specificValue: String?
         
         mutating func run() {
+            print("path: \(path)")
+            
             switch action {
             case .all:
                 print("action: all")
@@ -81,6 +83,29 @@ struct Application: ParsableCommand {
                     if let description = vulnerableVersion.vulnerability.cve?.description {
                         print("  --  description: \(description)")
                     }
+                }
+            case .sourceanalysis:
+                let analyser = DependencyChecker()
+                let vulnerableVersionsUsed = analyser.analyseFolder(path: path)
+                
+                /*
+                for vulnerableVersion in vulnerableVersionsUsed {
+                    var subTarget = ""
+                    if let value = vulnerableVersion.library.subtarget {
+                        subTarget = " - \(value)"
+                    }
+                    
+                    print("  --  \(vulnerableVersion.library.name) - \(vulnerableVersion.library.versionString)\(subTarget)")
+                    if let description = vulnerableVersion.vulnerability.cve?.description {
+                        print("  --  description: \(description)")
+                    }
+                }
+                 */
+                let sourceAnalyser = SourceAnalyser()
+                let locations = sourceAnalyser.analyseProject(path: path, vulnerableLibraries: vulnerableVersionsUsed)
+                
+                for location in locations {
+                    print("\(location.path):\(location.line):8: warning: \(location.warning) (vulnerable version)")
                 }
             case .dependencies:
                 print("action: dependencies")
