@@ -13,6 +13,7 @@ class DependencyAnalyser {
     var folder: URL
     var changed = false
     let settings: Settings
+    let specDirectory: String
     
     init(settings: Settings) {
         self.folder = settings.homeFolder
@@ -29,6 +30,74 @@ class DependencyAnalyser {
             translations = Translations(lastUpdated: Date(), translations: [:])
         }
         self.settings = settings
+        self.specDirectory = settings.specDirectory.path
+        
+        if self.checkSpecDirectory() == false {
+            self.checkoutSpecDirectory()
+        }
+        
+        if self.shouldUpdate {
+            self.update()
+        }
+    }
+    
+    var shouldUpdate: Bool {
+        if let timeInterval = self.settings.specTranslationTimeInterval {
+            // check if time since last updated is larger than the allowed timeinterval for updates
+            if self.translations.lastUpdated.timeIntervalSinceNow * -1 > timeInterval {
+                return true
+            }
+        }
+        
+        return false
+    }
+    
+    func update() {
+        os_log("update spec directory")
+        self.updateSpecDirectory()
+        var updatedTranslations: [String: Translation] = [:]
+        
+        for translation in self.translations.translations {
+            if translation.value.noTranslation {
+                // ignore, these will be removed from translations so that they can be updated
+            } else {
+                updatedTranslations[translation.key] = translation.value
+            }
+        }
+        self.translations.lastUpdated = Date()
+        self.translations.translations = updatedTranslations
+        
+        self.changed = true
+    }
+    
+    func checkSpecDirectory() -> Bool{
+        let directory = self.settings.specDirectory
+        let specPath = directory.appendingPathComponent("Specs", isDirectory: true)
+        
+        os_log("check spec path: \(specPath.path)")
+        let pathExists = FileManager.default.fileExists(atPath: specPath.path)
+        os_log("path exists: \(pathExists)")
+        
+        return pathExists
+    }
+    
+    func checkoutSpecDirectory() {
+        let source = "https://github.com/CocoaPods/Specs.git"
+        let directory = self.specDirectory
+        os_log("checkout spec directory into \(directory)")
+        
+        let res = Helper.shell(launchPath: "/usr/bin/git", arguments: ["clone", source, directory])
+            
+        os_log("Git clone.. \(res)")
+    }
+    
+    func updateSpecDirectory() {
+        os_log("update spec directory")
+        let directory = self.specDirectory
+        let gitPath = "\(directory)/.git"
+        
+        let res = Helper.shell(launchPath: "/usr/bin/git", arguments: ["--git-dir", gitPath, "--work-tree", directory, "pull"])
+        os_log("Git pull.. \(res)")
     }
     
     deinit {
@@ -120,13 +189,10 @@ class DependencyAnalyser {
     func translateLibraryVersion(name: String, version: String) -> (name: String, module: String?, version: String?)? {
         os_log("translate library name: \(name), version: \(version)")
         
-       // let currentDirectory = FileManager.default.currentDirectoryPath
-        let currentDirectory = "/Users/kristiina/Phd/Tools/GraphifyEvolution"
-        //os_log("currnent directory: \(currentDirectory)")
-        let specDirectory = "\(currentDirectory)/ExternalAnalysers/Specs/Specs" // TODO: check that the repo actually exists + refresh?
-        //os_log("specpath: \(specDirectory)")
+        let specSubPath = "\(self.specDirectory)/Specs"
+        os_log("specpath: \(specSubPath)")
         
-        if var translation = self.translations.translations[name] {
+        if let translation = self.translations.translations[name] {
             if translation.noTranslation {
                 return nil
             }
@@ -184,7 +250,7 @@ class DependencyAnalyser {
                                 translation.translatedVersions[version] = newVersion
                             }
                             
-                            if var newLibraryName = libraryName {
+                            if let newLibraryName = libraryName {
                                 libraryName = newLibraryName.trimmingCharacters(in: .whitespacesAndNewlines)
                                 libraryName = newLibraryName.replacingOccurrences(of: "\"", with: "")
                                 libraryName = newLibraryName.replacingOccurrences(of: ",", with: "")
@@ -246,14 +312,14 @@ class DependencyAnalyser {
             }
         } else {
             //find library in specs
-            let enumerator = FileManager.default.enumerator(atPath: specDirectory)
+            let enumerator = FileManager.default.enumerator(atPath: specSubPath)
             while let filename = enumerator?.nextObject() as? String {
                 //os_log(filename)
                 if filename.lowercased().hasSuffix("/\(name)") {
                     os_log("found: \(filename)")
                     
-                    var translation = Translation(podspecName: name)
-                    translation.specFolderPath = "\(specDirectory)/\(filename)"
+                    let translation = Translation(podspecName: name)
+                    translation.specFolderPath = "\(specSubPath)/\(filename)"
                     translations.translations[name] = translation
                     self.changed = true
                     
@@ -265,7 +331,7 @@ class DependencyAnalyser {
                 }
             }
             
-            var translation = Translation(podspecName: name)
+            let translation = Translation(podspecName: name)
             translation.noTranslation = true
             self.changed = true
             // add null translation to speed up project analysis for projects that have many dependencies that cannot be found in cocoapods
@@ -413,7 +479,7 @@ class DependencyAnalyser {
                     if line.starts(with: "\(charactersBeforeDash)- ") { // lines with more whitespace will be ignored
                         line = line.replacingOccurrences(of: "\(charactersBeforeDash)- ", with: "")
                         let components = line.components(separatedBy: .whitespaces)
-                        var name = components[0].replacingOccurrences(of: "\"", with: "").lowercased()
+                        let name = components[0].replacingOccurrences(of: "\"", with: "").lowercased()
                     
                         declaredPods.append(name)
                     }

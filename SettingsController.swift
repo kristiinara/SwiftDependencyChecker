@@ -81,10 +81,13 @@ class Settings: Codable {
     var cpeTimeInterval: TimeInterval? = 7 * 60 * 60 * 24 //default one week
     var vulnerabilityTimeInterval: TimeInterval? = 1 * 60 * 60 * 24 // default one day
     var homeFolder: URL
+    var specDirectory: URL
     
     init() {
         let home = FileManager.default.homeDirectoryForCurrentUser
         self.homeFolder = home.appendingPathComponent("DependencyInfo", isDirectory: true)
+        
+        self.specDirectory = self.homeFolder.appendingPathComponent("Cocoapods", isDirectory: true)
     }
 }
 

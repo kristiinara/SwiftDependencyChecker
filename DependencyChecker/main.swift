@@ -195,7 +195,7 @@ struct Application: ParsableCommand {
         
         
         enum Property: String, ExpressibleByArgument {
-            case homeFolder, specTimeInterval, cpeTimeInterval, vulnerabilityTimeInterval
+            case homeFolder, specTimeInterval, cpeTimeInterval, vulnerabilityTimeInterval, specDirectory
         }
         @Option(help: "which value to set or get")
         var property: Property?
@@ -213,6 +213,8 @@ struct Application: ParsableCommand {
                     switch property {
                     case .homeFolder:
                         print("\(settingsController.settings.homeFolder)")
+                    case .specDirectory:
+                        print("\(settingsController.settings.specDirectory)")
                     case .specTimeInterval:
                         print("\(settingsController.settings.specTranslationTimeInterval)")
                     case .cpeTimeInterval:
@@ -231,6 +233,11 @@ struct Application: ParsableCommand {
                         settingsController.folder = url
                         settingsController.settings.homeFolder = url
                         settingsController.changed = true
+                    case .specDirectory:
+                        let url = URL(fileURLWithPath: value)
+                        settingsController.settings.specDirectory = url
+                        settingsController.changed = true
+                        // TODO: chould this be also changed if the main url is changed?
                     case .specTimeInterval:
                         if let timeInterval = TimeInterval(value) {
                             settingsController.settings.specTranslationTimeInterval = timeInterval
