@@ -583,7 +583,7 @@ class DependencyAnalyser {
 
             if let dictionary = json as? [String: Any] {
                 if let object = dictionary["object"] as? [String: Any] {
-                    if let pins = dictionary["pinds"] as? [[String: Any]] {
+                    if let pins = object["pins"] as? [[String: Any]] {
                         for pin in pins {
                             var name: String?
                             var version: String?
