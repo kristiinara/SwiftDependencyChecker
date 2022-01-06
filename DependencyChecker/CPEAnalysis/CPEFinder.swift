@@ -44,13 +44,17 @@ class CPEFinder {
     }
     
     var shouldUpdate: Bool {
+        os_log("last updated: \(self.cpeDictionary.lastUpdated)")
+        
         if let timeInterval = self.settings.cpeTimeInterval {
             // check if time since last updated is larger than the allowed timeinterval for updates
             if self.cpeDictionary.lastUpdated.timeIntervalSinceNow * -1 > timeInterval {
+                os_log("Will update")
                 return true
             }
         }
         
+        os_log("No update")
         return false
     }
     

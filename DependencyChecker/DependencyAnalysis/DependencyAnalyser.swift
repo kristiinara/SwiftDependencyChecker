@@ -42,13 +42,17 @@ class DependencyAnalyser {
     }
     
     var shouldUpdate: Bool {
+        os_log("last updated: \(self.translations.lastUpdated)")
+        
         if let timeInterval = self.settings.specTranslationTimeInterval {
             // check if time since last updated is larger than the allowed timeinterval for updates
             if self.translations.lastUpdated.timeIntervalSinceNow * -1 > timeInterval {
+                os_log("Will update")
                 return true
             }
         }
         
+        os_log("No update")
         return false
     }
     
