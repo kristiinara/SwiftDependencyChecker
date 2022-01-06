@@ -59,7 +59,6 @@
 		4A387EC3277F3C560063B494 = {
 			isa = PBXGroup;
 			children = (
-				4AE314352784785E000DA297 /* SettingsController.swift */,
 				4A387ECE277F3C560063B494 /* DependencyChecker */,
 				4A387EDB277F3CC40063B494 /* Frameworks */,
 				4A387ECD277F3C560063B494 /* Products */,
@@ -77,6 +76,7 @@
 		4A387ECE277F3C560063B494 /* DependencyChecker */ = {
 			isa = PBXGroup;
 			children = (
+				4AE314352784785E000DA297 /* SettingsController.swift */,
 				4AE3142F2783214E000DA297 /* SourceAnalysis */,
 				4A387EF52781AA670063B494 /* VulnerabilityAnalysis */,
 				4A387EF22781A46B0063B494 /* CPEAnalysis */,
