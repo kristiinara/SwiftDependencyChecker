@@ -14,6 +14,7 @@ class DependencyAnalyser {
     var changed = false
     let settings: Settings
     let specDirectory: String
+    var onlyDirectDependencies = false
     
     init(settings: Settings) {
         self.folder = settings.homeFolder
@@ -194,7 +195,6 @@ class DependencyAnalyser {
         os_log("translate library name: \(name), version: \(version)")
         
         let specSubPath = "\(self.specDirectory)/Specs"
-        os_log("specpath: \(specSubPath)")
         
         if let translation = self.translations.translations[name] {
             if translation.noTranslation {
@@ -203,7 +203,7 @@ class DependencyAnalyser {
             
             if let translatedVersion = translation.translatedVersions[version] {
                 if let libraryName = translation.libraryName {
-                    return (name:libraryName, module: libraryName, version: translatedVersion)
+                    return (name:libraryName, module: translation.moduleName, version: translatedVersion)
                 } else {
                     return nil
                 }
@@ -238,6 +238,7 @@ class DependencyAnalyser {
                             moduleString = moduleString.replacingOccurrences(of: "\"module_name\": ", with: "")
                             moduleString = moduleString.replacingOccurrences(of: "\"", with: "")
                             moduleString = moduleString.replacingOccurrences(of: ",", with: "")
+                            print("moduleString: \(moduleString)")
                             
                             var module: String?
                             if moduleString == "" {
@@ -263,6 +264,7 @@ class DependencyAnalyser {
                             }
                             
                             translation.libraryName = libraryName
+                            translation.moduleName = module
                             self.translations.translations[name] = translation
                             self.changed = true
                             
@@ -287,6 +289,8 @@ class DependencyAnalyser {
                         moduleString = moduleString.replacingOccurrences(of: "\"module_name\": ", with: "")
                         moduleString = moduleString.replacingOccurrences(of: "\"", with: "")
                         moduleString = moduleString.replacingOccurrences(of: ",", with: "")
+                        print("moduleString: \(moduleString)")
+                        
                         var module: String?
                         if moduleString == "" {
                             module = nil
@@ -300,6 +304,7 @@ class DependencyAnalyser {
                             libraryName = libraryName.replacingOccurrences(of: ",", with: "")
                             
                             translation.libraryName = libraryName
+                            translation.moduleName = module
                             self.translations.translations[name] = translation
                             self.changed = true
                             
@@ -311,14 +316,15 @@ class DependencyAnalyser {
                 }
                 
                 if let libraryName = translation.libraryName {
-                    return (name: libraryName, module: libraryName, version: nil)
+                    return (name: libraryName, module: translation.moduleName, version: nil)
                 }
             }
         } else {
+            os_log("specpath: \(specSubPath)")
             //find library in specs
             let enumerator = FileManager.default.enumerator(atPath: specSubPath)
             while let filename = enumerator?.nextObject() as? String {
-                //os_log(filename)
+                os_log("\(filename), looking for \(name)")
                 if filename.lowercased().hasSuffix("/\(name)") {
                     os_log("found: \(filename)")
                     
@@ -330,7 +336,7 @@ class DependencyAnalyser {
                     return translateLibraryVersion(name: name, version: version)
                 }
                 
-                if filename.count > 7 {
+                if filename.count > 7 && !filename.hasSuffix(".DS_Store") {
                     enumerator?.skipDescendents()
                 }
             }
@@ -537,6 +543,10 @@ class DependencyAnalyser {
                     var direct = false
                     if declaredPods.contains(name) {
                         direct = true
+                    }
+                    
+                    if direct == false && self.onlyDirectDependencies {
+                        continue // ignore indirect dependencies
                     }
                     
                     var subspec: String? = nil

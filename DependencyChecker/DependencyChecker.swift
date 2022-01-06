@@ -10,6 +10,7 @@ import os.log
 
 class DependencyChecker {
     let settings: Settings
+    var onlyDirectDependencies = false
     
     init(settings: Settings) {
         self.settings = settings
@@ -19,6 +20,8 @@ class DependencyChecker {
         
         // find all dependencies:
         let analyser = DependencyAnalyser(settings: settings)
+        analyser.onlyDirectDependencies = self.onlyDirectDependencies
+        
         let libraries = analyser.analyseApp(folderPath: path)
         os_log("Dependencies: ")
         for library in libraries {

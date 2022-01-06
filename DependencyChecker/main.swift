@@ -64,6 +64,9 @@ struct Application: ParsableCommand {
         @Option(help: "Spcify a specific value for the selected action. For depenencies a specific manifest file can be provided, for dindcpe a specific library name can be provided and for querycve a specific cpe string can be provided.")
         var specificValue: String?
         
+        @Flag(help: "Analyse only direct dependencies.")
+        var onlyDirectDependencies = false
+        
         mutating func run() {
             print("path: \(path)")
             
@@ -73,6 +76,8 @@ struct Application: ParsableCommand {
             case .all:
                 print("action: all")
                 let analyser = DependencyChecker(settings: settings)
+                analyser.onlyDirectDependencies = onlyDirectDependencies
+                
                 let vulnerableVersionsUsed = analyser.analyseFolder(path: path)
                 
                 for vulnerableVersion in vulnerableVersionsUsed {
@@ -88,6 +93,7 @@ struct Application: ParsableCommand {
                 }
             case .sourceanalysis:
                 let analyser = DependencyChecker(settings: settings)
+                analyser.onlyDirectDependencies = onlyDirectDependencies
                 let vulnerableVersionsUsed = analyser.analyseFolder(path: path)
                 
                 /*
@@ -112,6 +118,7 @@ struct Application: ParsableCommand {
             case .dependencies:
                 print("action: dependencies")
                 let analyser = DependencyAnalyser(settings: settings)
+                analyser.onlyDirectDependencies = onlyDirectDependencies
                 let libraries = analyser.analyseApp(folderPath: path)
                 print("Dependencies: ")
                 for library in libraries {

@@ -22,23 +22,22 @@ class SourceAnalyser {
                 let url = URL(fileURLWithPath: fullPath)
                 if let fileContents = try? String(contentsOf: url) {
                     let lines = fileContents.components(separatedBy: .newlines)
-                    var count = 0
+                    var count = 1
                     for var line in lines {
                         line = line.trimmingCharacters(in: .whitespacesAndNewlines)
-                        os_log("line: \(line)")
                         if line.hasPrefix("import") {
                             let components = line.components(separatedBy: " ")
                             if components.count >= 2 {
                                 let name = components[1]
                                 os_log("import: \(name)")
                                 for libraryDef in vulnerableLibraries {
-                                    os_log("comparing to library: \(libraryDef.library.name)")
-                                    var name = libraryDef.library.name.lowercased()
+                                    var libraryName = libraryDef.library.name.lowercased()
                                     if let module = libraryDef.library.module {
-                                        name = module.lowercased()
+                                        libraryName = module.lowercased()
                                     }
+                                    os_log("comparing to library: \(libraryName)")
                                     
-                                    if name.hasSuffix("\(name.lowercased())") {
+                                    if libraryName.hasSuffix("\(name.lowercased())") {
                                         var warning = "vulnerable"
                                         if let description = libraryDef.vulnerability.cve?.description {
                                             warning = description
