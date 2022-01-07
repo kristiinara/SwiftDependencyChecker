@@ -220,15 +220,17 @@ class DependencyAnalyser {
                         }
                         
                         if filename.lowercased().hasPrefix("\(version)/") && filename.hasSuffix("podspec.json"){
+                            /*
                             var newVersion = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"version\":", "\(path)/\(filename)"])
                             newVersion = newVersion.trimmingCharacters(in: .whitespacesAndNewlines)
                             newVersion = newVersion.replacingOccurrences(of: "\"version\": ", with: "")
                             newVersion = newVersion.replacingOccurrences(of: "\"", with: "")
                             newVersion = newVersion.replacingOccurrences(of: ",", with: "")
+                             */
                             
                             var tag = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"tag\":", "\(path)/\(filename)"])
                             tag = tag.trimmingCharacters(in: .whitespacesAndNewlines)
-                            tag = tag.replacingOccurrences(of: "\"version\": ", with: "")
+                            tag = tag.replacingOccurrences(of: "\"tag\": ", with: "")
                             tag = tag.replacingOccurrences(of: "\"", with: "")
                             tag = tag.replacingOccurrences(of: ",", with: "")
                             
@@ -251,8 +253,8 @@ class DependencyAnalyser {
                             
                             var libraryName = getNameFromGitPath(path: gitPath)
                             
-                            if newVersion != "" && tag != "" {
-                                translation.translatedVersions[version] = newVersion
+                            if tag != "" {
+                                translation.translatedVersions[version] = tag
                             }
                             
                             if let newLibraryName = libraryName {
@@ -269,7 +271,7 @@ class DependencyAnalyser {
                             self.changed = true
                             
                             if let libraryName = libraryName {
-                                return (name: libraryName, module: module, version: newVersion)
+                                return (name: libraryName, module: module, version: translation.translatedVersions[version])
                             } else {
                                 return nil
                             }
@@ -324,7 +326,7 @@ class DependencyAnalyser {
             //find library in specs
             let enumerator = FileManager.default.enumerator(atPath: specSubPath)
             while let filename = enumerator?.nextObject() as? String {
-                os_log("\(filename), looking for \(name)")
+                //os_log("\(filename), looking for \(name)")
                 if filename.lowercased().hasSuffix("/\(name)") {
                     os_log("found: \(filename)")
                     
