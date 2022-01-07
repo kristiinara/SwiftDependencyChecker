@@ -343,6 +343,7 @@ class DependencyAnalyser {
             
             let translation = Translation(podspecName: name)
             translation.noTranslation = true
+            self.translations.translations[name] = translation
             self.changed = true
             // add null translation to speed up project analysis for projects that have many dependencies that cannot be found in cocoapods
         }
