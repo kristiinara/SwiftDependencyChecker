@@ -111,6 +111,21 @@ class AnalysedLibrary {
                         let libraryVersion = Version(from: library.versionString)
                         os_log("compare: \(library.versionString), \(version.versionString)")
                         if let libraryComparable = libraryVersion.comparableVersion {
+                            if let exact = version.exactVersion {
+                                let exactVersion = Version(from: exact)
+                                
+                                if let exactVersionComparable = exactVersion.comparableVersion {
+                                    if libraryComparable == exactVersionComparable {
+                                        os_log("is a match")
+                                        vulnerableVersions.append((library: library, vulnerability: vulnerability))
+                                        continue libraryLoop
+                                    } else {
+                                        os_log("not a match ")
+                                        continue 
+                                    }
+                                }
+                            }
+                            
                             if let endExcluding = version.versionEndExcluding {
                                 let endExcludingVersion = Version(from: endExcluding)
                                 
