@@ -240,7 +240,7 @@ class DependencyAnalyser {
                             moduleString = moduleString.replacingOccurrences(of: "\"module_name\": ", with: "")
                             moduleString = moduleString.replacingOccurrences(of: "\"", with: "")
                             moduleString = moduleString.replacingOccurrences(of: ",", with: "")
-                            print("moduleString: \(moduleString)")
+                            os_log("moduleString: \(moduleString)")
                             
                             var module: String?
                             if moduleString == "" {
@@ -291,7 +291,7 @@ class DependencyAnalyser {
                         moduleString = moduleString.replacingOccurrences(of: "\"module_name\": ", with: "")
                         moduleString = moduleString.replacingOccurrences(of: "\"", with: "")
                         moduleString = moduleString.replacingOccurrences(of: ",", with: "")
-                        print("moduleString: \(moduleString)")
+                        os_log("moduleString: \(moduleString)")
                         
                         var module: String?
                         if moduleString == "" {

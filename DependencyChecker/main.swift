@@ -127,14 +127,19 @@ struct Application: ParsableCommand {
                         subTarget = " - \(value)"
                     }
                     
+                    var module = ""
+                    if let value = library.module {
+                        module = " (\(value))"
+                    }
+                    
                     if let direct = library.directDependency {
                         if direct {
-                            print("\(library.name) \(library.versionString)\(subTarget)")
+                            print("\(library.name) \(library.versionString)\(subTarget)\(module)")
                         } else {
-                            print("Indirect: \(library.name) \(library.versionString)\(subTarget)")
+                            print("Indirect: \(library.name) \(library.versionString)\(subTarget)\(module)")
                         }
                     } else {
-                        print("\(library.name) \(library.versionString)\(subTarget)")
+                        print("\(library.name) \(library.versionString)\(subTarget)\(module)")
                     }
                 }
             case .findcpe:

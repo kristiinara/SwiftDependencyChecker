@@ -102,79 +102,73 @@ class AnalysedLibrary {
         var vulnerableVersions: [(library: Library, vulnerability: CVEData)] = []
         
         for vulnerability in vulnerabilities {
+            os_log("vulnerability: \(vulnerability.cve?.description ?? "")")
             if let versions = vulnerability.configuration?.affectedVersions {
-                for version in versions {
-                    for library in versionsUsed {
-                        if let libraryVersion = parseVersion(versionString: library.versionString) {
-                        
-                            if let endExcluding = parseVersion(versionString: version.versionEndExcluding) {
-                                if libraryVersion.major > endExcluding.major {
-                                    continue
-                                }
+            libraryLoop: for library in versionsUsed {
+                    os_log("library: \(library.name)")
+                    for version in versions {
+                        os_log("version: \(version.versionString)")
+                        let libraryVersion = Version(from: library.versionString)
+                        os_log("compare: \(library.versionString), \(version.versionString)")
+                        if let libraryComparable = libraryVersion.comparableVersion {
+                            if let endExcluding = version.versionEndExcluding {
+                                let endExcludingVersion = Version(from: endExcluding)
                                 
-                                if libraryVersion.minor > endExcluding.minor {
-                                    continue
-                                }
-                                
-                                if libraryVersion.revision > endExcluding.revision {
-                                    continue
-                                }
-                                
-                                if libraryVersion == endExcluding {
-                                    continue
-                                }
-                            }
-                            
-                            if let endIncluding = parseVersion(versionString: version.versionEndIncluding) {
-                                    if libraryVersion.major > endIncluding.major {
+                                if let endExcludingComparable = endExcludingVersion.comparableVersion {
+                                    if libraryComparable >= endExcludingComparable {
+                                        os_log("continue")
                                         continue
                                     }
-                                    
-                                    if libraryVersion.minor > endIncluding.minor {
-                                        continue
-                                    }
-                                    
-                                    if libraryVersion.revision > endIncluding.revision {
-                                        continue
-                                    }
+                                } else {
+                                    //TODO what do we do then? Currently will include it just in case
+                                }
+                            } else {
+                                os_log("not comparable \("\(version.versionEndExcluding)")")
                             }
                             
-                            if let startIncluding = parseVersion(versionString: version.versionStartIncluding) {
-                                if libraryVersion.major < startIncluding.major {
-                                    continue
-                                }
+                            if let endIncluding = version.versionEndIncluding {
+                                let endIncludingVersion = Version(from: endIncluding)
                                 
-                                if libraryVersion.minor < startIncluding.minor {
-                                    continue
+                                if let endIncludingComparable = endIncludingVersion.comparableVersion {
+                                    if libraryComparable > endIncludingComparable {
+                                        continue
+                                    }
                                 }
-                                
-                                if libraryVersion.revision < startIncluding.revision {
-                                    continue
-                                }
+                            } else {
+                                os_log("not comparable \("\(version.versionEndIncluding)")")
                             }
                             
-                            if let startExcluding = parseVersion(versionString: version.versionStartExcluding) {
-                                if libraryVersion.major < startExcluding.major {
-                                    continue
-                                }
+                            if let startExcluding = version.versionStartExcluding {
+                                let startExcludingVersion = Version(from: startExcluding)
                                 
-                                if libraryVersion.minor < startExcluding.minor {
-                                    continue
+                                if let startExcludingComparable = startExcludingVersion.comparableVersion {
+                                    if libraryComparable <= startExcludingComparable {
+                                        continue
+                                    }
                                 }
-                                
-                                if libraryVersion.revision < startExcluding.revision {
-                                    continue
-                                }
-                                
-                                if libraryVersion == startExcluding {
-                                    continue
-                                }
+                            } else {
+                                os_log("not comparable \("\(version.versionStartExcluding)")")
                             }
+                            
+                            if let startIncluding = version.versionStartIncluding {
+                                let startIncludingVersion = Version(from: startIncluding)
+                                
+                                if let startIncludingComparable = startIncludingVersion.comparableVersion {
+                                    if libraryComparable < startIncludingComparable {
+                                        continue
+                                    }
+                                }
+                            } else {
+                                os_log("not comparable \("\(version.versionStartIncluding)")")
+                            }
+                            
                         } else {
-                            os_log("Cannot parse library version \(library.versionString)")
+                            os_log("not comparable")
                         }
                         
+                        os_log("is a match")
                         vulnerableVersions.append((library: library, vulnerability: vulnerability))
+                        continue libraryLoop
                     }
                 }
             }
@@ -184,8 +178,12 @@ class AnalysedLibrary {
     }
     
     func parseVersion(versionString: String?) -> (major: Int, minor: Int, revision: Int)? {
-        guard let version = versionString else {
+        guard var version = versionString else {
             return nil
+        }
+        
+        if version.starts(with: "v") {
+            version = String(version.dropFirst())
         }
         
         let components = version.split(separator: ".")
@@ -199,5 +197,97 @@ class AnalysedLibrary {
         }
         
         return nil
+    }
+}
+
+class ComparableVersion: Comparable {
+    let values: [Int]
+    
+    init(values: [Int]) {
+        self.values = values
+    }
+    
+    static func == (lhs: ComparableVersion, rhs: ComparableVersion) -> Bool {
+        if lhs.values.count != rhs.values.count {
+            return false
+        }
+        
+        for i in 0...(lhs.values.count - 1) {
+            if lhs.values[i] != lhs.values[i] {
+                return false
+            }
+        }
+        
+        return true
+    }
+    
+    static func < (lhs: ComparableVersion, rhs: ComparableVersion) -> Bool {
+        os_log("compare: \(lhs.values) < \(rhs.values)")
+        var total = 0
+        if lhs.values.count > rhs.values.count {
+            total = rhs.values.count
+        } else {
+            total = lhs.values.count
+        }
+        
+        os_log("total: \(total)")
+        os_log("rhs.count \(rhs.values.count), lhs.values.count: \(lhs.values.count)")
+        for i in 0...(total - 1) {
+            os_log("\(i) \(lhs.values[i]) > \(rhs.values[i] )")
+            if lhs.values[i] > rhs.values[i] {
+                os_log("yes")
+                return false
+            }
+            
+            if lhs.values[i] < rhs.values[i] {
+                return true
+            }
+            os_log("no")
+        }
+        
+        if lhs == rhs {
+            return false
+        }
+        
+        return true
+    }
+}
+
+class Version {
+    let versionString: String
+    let comparableVersion: ComparableVersion?
+    
+    init(from: String) {
+        self.versionString = from
+        
+        var version = from
+        if version.starts(with: "v") {
+            version = String(version.dropFirst())
+        }
+        
+        let components = version.split(separator: ".")
+        
+        var parts: [Int] = []
+        var incorrectValue = false
+        
+        for component in components {
+            var stringValue = String(component)
+            
+            if stringValue.hasSuffix("-beta") {
+                stringValue = stringValue.replacingOccurrences(of: "-beta", with: "")
+            }
+            
+            if let intValue = Int(stringValue) {
+                parts.append(intValue)
+            } else {
+                incorrectValue = true
+            }
+        }
+        
+        if !incorrectValue {
+            self.comparableVersion = ComparableVersion(values: parts)
+        } else {
+            self.comparableVersion = nil
+        }
     }
 }
