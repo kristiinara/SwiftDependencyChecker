@@ -1,3 +1,3 @@
-# DependencyChecker
+# SwiftDependencyChecker
 
 A description of this package.
