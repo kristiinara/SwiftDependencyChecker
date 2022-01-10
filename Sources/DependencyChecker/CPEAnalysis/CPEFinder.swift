@@ -157,29 +157,49 @@ class CPEFinder {
                 os_log(.debug, "cpe for title: \(name)")
                 os_log(.debug, "querying from file: \(cpePath)")
                 
-                let output = Helper.shell(launchPath: "/bin/zsh", arguments: ["-c", "grep -A3 -i -e \(name) \(cpePath) | grep \"<cpe-23:cpe23-item name\""])
-                os_log(.debug, "cpe output: \(output)")
-                if output != "" {
-                    let items = output.components(separatedBy: "\n")
-                    if items.count > 0 {
-                        var first = items.first!
-                        let components = first.components(separatedBy: "<cpe-23:cpe23-item name=\"")
-                        if components.count > 0 {
-                            first = components.last!
-                            first = first.replacingOccurrences(of: "\"/>", with: "")
-                            //os_log(first)
+                if let cpeData = try? String(contentsOfFile: cpePath) {
+                    let lines = cpeData.components(separatedBy: .newlines)
+                    
+                    var itemFound = false
+                    var lineCount = 0
+                    for line in lines {
+                        if itemFound {
+                            lineCount += 1
+                        }
+                        
+                        if line.contains(name) {
+                            itemFound = true
+                            lineCount = 0
+                        }
+                        
+                        if itemFound {
+                            if line.contains("</cpe-item>") {
+                                itemFound = false
+                                lineCount = 0
+                            }
                             
-                            var splitValues = first.components(separatedBy: ":")
-                            splitValues[5] = "*"
-                            let cleanedCpe = "\(splitValues.joined(separator: ":"))"
-                            os_log(.debug, "cleaned: \(cleanedCpe)")
-                            
-                            self.cpeDictionary.dictionary[name] = CPE(value: cleanedCpe)
-                            self.changed = true
-                            
-                            return cleanedCpe
+                            if line.contains("<cpe-23:cpe23-item name=\"") {
+                                let components = line.components(separatedBy: "<cpe-23:cpe23-item name=\"")
+                                if components.count > 0 {
+                                    var value = components.last!
+                                    value = value.replacingOccurrences(of: "\"/>", with: "")
+                                    //os_log(first)
+                                    
+                                    var splitValues = value.components(separatedBy: ":")
+                                    splitValues[5] = "*"
+                                    let cleanedCpe = "\(splitValues.joined(separator: ":"))"
+                                    os_log(.debug, "cleaned: \(cleanedCpe)")
+                                    
+                                    self.cpeDictionary.dictionary[name] = CPE(value: cleanedCpe)
+                                    self.changed = true
+                                    
+                                    return cleanedCpe
+                                }
+                            }
                         }
                     }
+                } else {
+                    os_log(.error, "Could not read cpe file at \(cpePath)")
                 }
             } else {
                 os_log(.error, "cpe dictionary not found!")
