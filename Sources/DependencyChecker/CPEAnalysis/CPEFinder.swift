@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Gzip
 import os.log
 
 class CPEFinder {
@@ -94,8 +95,8 @@ class CPEFinder {
             if let data = try? Data(contentsOf: downloadURL) {
                 do {
                     try data.write(to: gzipPath)
-                    let res = Helper.shell(launchPath: "/usr/bin/gzip", arguments: ["-d", gzipPath.path])
-                    os_log(.info, "Unzipping: \(res)")
+                    let decompressedData = try data.gunzipped()
+                    try decompressedData.write(to: self.cpePath)
                 } catch {
                     os_log(.error, "Downloading official cpe dictionary failed: \(error.localizedDescription)")
                 }
