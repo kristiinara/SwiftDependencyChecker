@@ -16,7 +16,7 @@ class SourceAnalyser {
         let enumerator = FileManager.default.enumerator(atPath: path)
         while let filename = enumerator?.nextObject() as? String {
             //os_log(filename)
-            if filename.hasSuffix(".swift") {
+            if filename.hasSuffix(".swift") || filename.hasSuffix("Podfile.lock") {
                 let fullPath = "\(path)/\(filename)"
                 os_log("fullpath: \(fullPath)")
                 let url = URL(fileURLWithPath: fullPath)
@@ -25,7 +25,11 @@ class SourceAnalyser {
                     var count = 1
                     for var line in lines {
                         line = line.trimmingCharacters(in: .whitespacesAndNewlines)
-                        if line.hasPrefix("import") {
+                        if filename.hasSuffix("Podfile.lock") && line.hasPrefix("DEPENDENCIES:") {
+                            break
+                        }
+                        
+                        if line.hasPrefix("import") || line.hasPrefix("-") {
                             let components = line.components(separatedBy: " ")
                             if components.count >= 2 {
                                 let name = components[1]
@@ -35,6 +39,11 @@ class SourceAnalyser {
                                     if let module = libraryDef.library.module {
                                         libraryName = module.lowercased()
                                     }
+                                    
+                                    if let subTarget = libraryDef.library.subtarget {
+                                        libraryName = "\(libraryName)/\(subTarget)"
+                                    }
+                                    
                                     os_log("comparing to library: \(libraryName)")
                                     
                                     if libraryName.hasSuffix("\(name.lowercased())") {
