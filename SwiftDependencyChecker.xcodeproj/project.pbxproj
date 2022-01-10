@@ -31,7 +31,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4A387ECC277F3C560063B494 /* DependencyChecker */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DependencyChecker; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A387ECC277F3C560063B494 /* SwiftDependencyChecker */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SwiftDependencyChecker; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A387ECF277F3C560063B494 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		4A387EDC277F3CC40063B494 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		4A387EDE277F3CC40063B494 /* XcodeKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XcodeKit.framework; path = Library/Frameworks/XcodeKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -68,7 +68,7 @@
 		4A387ECD277F3C560063B494 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4A387ECC277F3C560063B494 /* DependencyChecker */,
+				4A387ECC277F3C560063B494 /* SwiftDependencyChecker */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -132,9 +132,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4A387ECB277F3C560063B494 /* DependencyChecker */ = {
+		4A387ECB277F3C560063B494 /* SwiftDependencyChecker */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4A387ED3277F3C560063B494 /* Build configuration list for PBXNativeTarget "DependencyChecker" */;
+			buildConfigurationList = 4A387ED3277F3C560063B494 /* Build configuration list for PBXNativeTarget "SwiftDependencyChecker" */;
 			buildPhases = (
 				4A387EC8277F3C560063B494 /* Sources */,
 				4A387EC9277F3C560063B494 /* Frameworks */,
@@ -144,12 +144,12 @@
 			);
 			dependencies = (
 			);
-			name = DependencyChecker;
+			name = SwiftDependencyChecker;
 			packageProductDependencies = (
 				4A387EEB27808FA10063B494 /* ArgumentParser */,
 			);
 			productName = DependencyChecker;
-			productReference = 4A387ECC277F3C560063B494 /* DependencyChecker */;
+			productReference = 4A387ECC277F3C560063B494 /* SwiftDependencyChecker */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -166,7 +166,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 4A387EC7277F3C560063B494 /* Build configuration list for PBXProject "DependencyChecker" */;
+			buildConfigurationList = 4A387EC7277F3C560063B494 /* Build configuration list for PBXProject "SwiftDependencyChecker" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -182,7 +182,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4A387ECB277F3C560063B494 /* DependencyChecker */,
+				4A387ECB277F3C560063B494 /* SwiftDependencyChecker */,
 			);
 		};
 /* End PBXProject section */
@@ -348,7 +348,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		4A387EC7277F3C560063B494 /* Build configuration list for PBXProject "DependencyChecker" */ = {
+		4A387EC7277F3C560063B494 /* Build configuration list for PBXProject "SwiftDependencyChecker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4A387ED1277F3C560063B494 /* Debug */,
@@ -357,7 +357,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4A387ED3277F3C560063B494 /* Build configuration list for PBXNativeTarget "DependencyChecker" */ = {
+		4A387ED3277F3C560063B494 /* Build configuration list for PBXNativeTarget "SwiftDependencyChecker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4A387ED4277F3C560063B494 /* Debug */,

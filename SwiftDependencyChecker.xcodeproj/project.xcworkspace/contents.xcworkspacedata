@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:">
+      location = "self:/Users/kristiina/Phd/Tools/DependencyChecker/SwiftDependencyChecker.xcodeproj">
    </FileRef>
 </Workspace>
