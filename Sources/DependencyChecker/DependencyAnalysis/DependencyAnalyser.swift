@@ -220,40 +220,16 @@ class DependencyAnalyser {
                         }
                         
                         if filename.lowercased().hasPrefix("\(version)/") && filename.hasSuffix("podspec.json"){
-                            /*
-                            var newVersion = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"version\":", "\(path)/\(filename)"])
-                            newVersion = newVersion.trimmingCharacters(in: .whitespacesAndNewlines)
-                            newVersion = newVersion.replacingOccurrences(of: "\"version\": ", with: "")
-                            newVersion = newVersion.replacingOccurrences(of: "\"", with: "")
-                            newVersion = newVersion.replacingOccurrences(of: ",", with: "")
-                             */
                             
-                            var tag = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"tag\":", "\(path)/\(filename)"])
-                            tag = tag.trimmingCharacters(in: .whitespacesAndNewlines)
-                            tag = tag.replacingOccurrences(of: "\"tag\": ", with: "")
-                            tag = tag.replacingOccurrences(of: "\"", with: "")
-                            tag = tag.replacingOccurrences(of: ",", with: "")
+                            let values = findValuesInPodspecFile(keys: ["tag", "module_name", "git"], path: "\(path)/\(filename)")
                             
-                            
-                            var moduleString = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"module_name\":", "\(path)/\(filename)"])
-                            moduleString = moduleString.trimmingCharacters(in: .whitespacesAndNewlines)
-                            moduleString = moduleString.replacingOccurrences(of: "\"module_name\": ", with: "")
-                            moduleString = moduleString.replacingOccurrences(of: "\"", with: "")
-                            moduleString = moduleString.replacingOccurrences(of: ",", with: "")
-                            os_log(.debug, "moduleString: \(moduleString)")
-                            
-                            var module: String?
-                            if moduleString == "" {
-                                module = nil
-                            } else {
-                                module = moduleString
-                            }
- 
-                            let gitPath = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"git\":", "\(path)/\(filename)"])
+                            var tag = values["tag"]
+                            var module = values["module_name"]
+                            let gitPath = values["git"] ?? ""
                             
                             var libraryName = getNameFromGitPath(path: gitPath)
                             
-                            if tag != "" {
+                            if tag != nil && tag != "" {
                                 translation.translatedVersions[version] = tag
                             }
                             
@@ -281,24 +257,15 @@ class DependencyAnalyser {
                         os_log(.debug, "parse podSpecPath: \(podSpecPath)")
                         var libraryName: String? = nil
                         
-                        let gitPath = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"git\":", "\(podSpecPath)"])
+                        let values = findValuesInPodspecFile(keys: ["module_name", "git"], path: podSpecPath)
+                        
+                        let gitPath = values["git"] ?? ""
                         os_log(.debug, "found gitPath: \(gitPath)")
                         
                         libraryName = getNameFromGitPath(path: gitPath)
                         
-                        var moduleString = Helper.shell(launchPath: "/usr/bin/grep", arguments: ["\"module_name\":", "\(podSpecPath)"])
-                        moduleString = moduleString.trimmingCharacters(in: .whitespacesAndNewlines)
-                        moduleString = moduleString.replacingOccurrences(of: "\"module_name\": ", with: "")
-                        moduleString = moduleString.replacingOccurrences(of: "\"", with: "")
-                        moduleString = moduleString.replacingOccurrences(of: ",", with: "")
-                        os_log(.debug, "moduleString: \(moduleString)")
-                        
-                        var module: String?
-                        if moduleString == "" {
-                            module = nil
-                        } else {
-                            module = moduleString
-                        }
+                        var module = values["module_name"]
+                        os_log(.debug, "moduleString: \(module ?? "")")
                         
                         if var libraryName = libraryName {
                             libraryName = libraryName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -357,6 +324,35 @@ class DependencyAnalyser {
             )
          */
         return nil
+    }
+    
+    func findValuesInPodspecFile(keys: [String], path: String) -> [String: String] {
+        var dictionary: [String: String] = [:]
+        
+        if let fileContents = try? String(contentsOfFile: path) {
+            let lines = fileContents.components(separatedBy: .newlines)
+            
+            for key in keys {
+                for var line in lines {
+                    line = line.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if line.hasPrefix("\"\(key)\": ") {
+                        var value = line
+                        
+                        value = value.trimmingCharacters(in: .whitespacesAndNewlines)
+                        value = value.replacingOccurrences(of: "\"\(key)\": ", with: "")
+                        value = value.replacingOccurrences(of: "\"", with: "")
+                        value = value.replacingOccurrences(of: ",", with: "")
+                        
+                        dictionary[key] = value
+                        break
+                    }
+                }
+            }
+        } else {
+            os_log(.error, "Could not read spec file at: \(path)")
+        }
+        
+        return dictionary
     }
     
     func analyseApp(folderPath: String) -> [Library] {
