@@ -188,6 +188,8 @@ class CPEFinder {
         }
         
         self.cpeDictionary.dictionary[name] = CPE(value: nil)
+        self.changed = true
+        
         return nil
     }
 }

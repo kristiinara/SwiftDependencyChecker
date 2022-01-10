@@ -604,15 +604,29 @@ class DependencyAnalyser {
                         for pin in pins {
                             var name: String?
                             var version: String?
+                            var module: String?
                             
-                            name = pin["package"] as? String
+                            module = pin["package"] as? String
+                            let repoURL = pin["repositoryURL"] as? String
+                            
+                            if let url = repoURL {
+                                if let correctName = getNameFrom(url: url) {
+                                    name = correctName
+                                } else {
+                                    name = module
+                                }
+                            } else {
+                                name = module
+                            }
+                            
                             
                             if let state = pin["state"] as? [String: Any] {
                                 version = state["version"] as? String
                             }
                             
-                            let library = Library(name: name ?? "??", versionString: version ?? "??")
+                            let library = Library(name: name ?? "??", versionString: version ?? "")
                             library.platform = "swiftpm"
+                            library.module = module
                             
                             libraries.append(library)
                         }
@@ -624,6 +638,18 @@ class DependencyAnalyser {
         }
         
         return libraries
+    }
+    
+    func getNameFrom(url: String) -> String? {
+        let value = url.replacingOccurrences(of: ".git", with: "")
+        let components = value.split(separator: "/")
+        if components.count < 2 {
+            return nil
+        }
+        
+        let count = components.count
+        let name = "\(components[count - 2])/\(components[count - 1])"
+        return name
     }
     
     func findPodFile(homePath: String) -> DependencyFile {

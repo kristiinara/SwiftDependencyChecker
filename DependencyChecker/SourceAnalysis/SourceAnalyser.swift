@@ -16,9 +16,19 @@ class SourceAnalyser {
         let enumerator = FileManager.default.enumerator(atPath: path)
         while let filename = enumerator?.nextObject() as? String {
             //os_log(filename)
-            if filename.hasSuffix(".swift") || filename.hasSuffix("Podfile.lock") {
+            if filename.hasSuffix(".swift") || filename.hasSuffix("Podfile.lock") || filename.hasSuffix("Package.resolved") || filename.hasSuffix("Cartfile.resolved") {
                 let fullPath = "\(path)/\(filename)"
                 os_log("fullpath: \(fullPath)")
+                
+                var detectedPlatform: String? = nil
+                if filename.hasSuffix("Podfile.lock") {
+                    detectedPlatform = "cocoapods"
+                } else if filename.hasSuffix("Cartfile.resolved") {
+                    detectedPlatform = "carthage"
+                } else if filename.hasSuffix("Package.resolved") {
+                    detectedPlatform = "swiftpm"
+                }
+                
                 let url = URL(fileURLWithPath: fullPath)
                 if let fileContents = try? String(contentsOf: url) {
                     let lines = fileContents.components(separatedBy: .newlines)
@@ -29,12 +39,22 @@ class SourceAnalyser {
                             break
                         }
                         
-                        if line.hasPrefix("import") || line.hasPrefix("-") {
+                        if line.hasPrefix("import") || line.hasPrefix("-") || line.hasPrefix("\"package\":") || filename.hasSuffix("Cartfile.resolved") {
+                            
                             let components = line.components(separatedBy: " ")
                             if components.count >= 2 {
-                                let name = components[1]
+                                var name = components[1]
+                                name = name.replacingOccurrences(of: "\"", with: "")
+                                name = name.replacingOccurrences(of: ",", with: "")
+                                
                                 os_log("import: \(name)")
                                 for libraryDef in vulnerableLibraries {
+                                    if let platform = libraryDef.library.platform, let detectedPlatform = detectedPlatform {
+                                        if platform != detectedPlatform {
+                                            continue
+                                        }
+                                    }
+                                    
                                     var libraryName = libraryDef.library.name.lowercased()
                                     if let module = libraryDef.library.module {
                                         libraryName = module.lowercased()
