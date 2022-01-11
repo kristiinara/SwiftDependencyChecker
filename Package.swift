@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "DependencyChecker",
+    name: "SwiftDependencyChecker",
     platforms: [
         .macOS(.v11)
     ],
