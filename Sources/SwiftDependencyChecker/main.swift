@@ -47,7 +47,7 @@ struct Application: ParsableCommand {
         var path: String = FileManager.default.currentDirectoryPath
         
         enum Action: String, ExpressibleByArgument {
-            case all, dependencies, findcpe, querycve, sourceanalysis
+            case all, dependencies, findcpe, querycve, sourceanalysis, translate
         }
         @Option(help: "Action to take. Dependencies detects the dependencies declared. Findcpe finds the corresponding cpe for each library, querycve queries cve-s from NVD database.")
         var action: Action = .all
@@ -124,27 +124,29 @@ struct Application: ParsableCommand {
                 for library in libraries {
                     var subTarget = ""
                     if let value = library.subtarget {
-                        subTarget = " - \(value)"
+                        subTarget = " sub-target:\(value)"
                     }
                     
                     var module = ""
                     if let value = library.module {
-                        module = " (\(value))"
+                        module = " module:\(value)"
                     }
                     
                     var platform = ""
                     if let value = library.platform {
-                        platform = "\(platform):"
+                        platform = "platform:\(value) "
                     }
+                    
+                    let dataString = "\(platform)name:\(library.name) version:\(library.versionString)\(subTarget)\(module)"
                     
                     if let direct = library.directDependency {
                         if direct {
-                            print("\(library.platform) \(library.name) \(library.versionString)\(subTarget)\(module)")
+                            print(dataString)
                         } else {
-                            print("Indirect:\(library.platform) \(library.name) \(library.versionString)\(subTarget)\(module)")
+                            print("Indirect \(dataString)")
                         }
                     } else {
-                        print("\(library.platform) \(library.name) \(library.versionString)\(subTarget)\(module)")
+                        print(dataString)
                     }
                 }
             case .findcpe:
@@ -194,6 +196,28 @@ struct Application: ParsableCommand {
                         } else {
                             print("no description")
                         }
+                    }
+                } else {
+                    print("Currently only analysis with specific value supported.")
+                }
+                
+            case .translate:
+                print("action: translate")
+                let analyser = DependencyAnalyser(settings: settings)
+                if let specificValue = specificValue {
+                    let components = specificValue.split(separator: ",")
+                    if components.count == 2 {
+                        let name = String(components[0]).lowercased()
+                        let version = String(components[1])
+                        print("name: \(name), version: \(version)")
+                        
+                        if let translation = analyser.translateLibraryVersion(name: name, version: version) {
+                            print("translation: \(translation.name.lowercased()):\(translation.version ?? String(components[1]))")
+                        } else {
+                            print("no translation")
+                        }
+                    } else {
+                        print("Specific value should be of form: name,version")
                     }
                 } else {
                     print("Currently only analysis with specific value supported.")

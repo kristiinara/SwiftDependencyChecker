@@ -556,6 +556,7 @@ class DependencyAnalyser {
                     }
                     
                     var module: String? = nil
+                    var oldName = name
                     // translate to same library names and versions as Carthage
                     if let translation = translateLibraryVersion(name: name, version: version) {
                         name = translation.name
@@ -568,7 +569,12 @@ class DependencyAnalyser {
                     let library = Library(name: name, versionString: version)
                     library.directDependency = direct
                     library.subtarget = subspec
-                    library.module = module
+                    
+                    if let module = module {
+                        library.module = module
+                    } else {
+                        library.module = oldName
+                    }
                     library.platform = "cocoapods"
                     
                     libraries.append(library)
