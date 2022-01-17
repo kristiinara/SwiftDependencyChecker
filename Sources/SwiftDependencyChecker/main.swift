@@ -67,8 +67,26 @@ struct Application: ParsableCommand {
         @Flag(help: "Analyse only direct dependencies.")
         var onlyDirectDependencies = false
         
+        enum Level: String, ExpressibleByArgument {
+            case debug, info, error, none
+        }
+        
+        @Option(help: "Set logging level, default is info. Options: debug, info, error and none.")
+        var logLevel: Level = .info
+        
         mutating func run() {
             print("path: \(path)")
+            
+            switch(logLevel) {
+            case .info:
+                Logger.setLevel = .info
+            case .debug:
+                Logger.setLevel = .debug
+            case .error:
+                Logger.setLevel = .error
+            case .none:
+                Logger.setLevel = .none
+            }
             
             let settings = Settings()
             

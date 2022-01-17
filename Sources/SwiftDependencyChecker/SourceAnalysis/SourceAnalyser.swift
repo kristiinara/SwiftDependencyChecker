@@ -10,15 +10,15 @@ import os.log
 
 class SourceAnalyser {
     func analyseProject(path: String, vulnerableLibraries: [(library: Library, vulnerability: CVEData)]) -> [FileLocation] {
-        os_log(.info, "analysing project files")
+        Logger.log(.info, "analysing project files")
         var fileLocations: [FileLocation] = []
         
         let enumerator = FileManager.default.enumerator(atPath: path)
         while let filename = enumerator?.nextObject() as? String {
-            //os_log(filename)
+            //Logger.log(filename)
             if filename.hasSuffix(".swift") || filename.hasSuffix("Podfile.lock") || filename.hasSuffix("Package.resolved") || filename.hasSuffix("Cartfile.resolved") {
                 let fullPath = "\(path)/\(filename)"
-                os_log(.debug, "fullpath: \(fullPath)")
+                Logger.log(.debug, "fullpath: \(fullPath)")
                 
                 var detectedPlatform: String? = nil
                 if filename.hasSuffix("Podfile.lock") {
@@ -47,7 +47,7 @@ class SourceAnalyser {
                                 name = name.replacingOccurrences(of: "\"", with: "")
                                 name = name.replacingOccurrences(of: ",", with: "")
                                 
-                                os_log(.debug, "import: \(name)")
+                                Logger.log(.debug, "import: \(name)")
                                 for libraryDef in vulnerableLibraries {
                                     if let platform = libraryDef.library.platform, let detectedPlatform = detectedPlatform {
                                         if platform != detectedPlatform {
@@ -64,7 +64,7 @@ class SourceAnalyser {
                                         libraryName = "\(libraryName)/\(subTarget)"
                                     }
                                     
-                                    os_log(.debug, "comparing to library: \(libraryName)")
+                                    Logger.log(.debug, "comparing to library: \(libraryName)")
                                     
                                     if libraryName.hasSuffix("\(name.lowercased())") {
                                         var warning = "vulnerable"

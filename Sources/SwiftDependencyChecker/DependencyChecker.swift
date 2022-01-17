@@ -23,7 +23,7 @@ class DependencyChecker {
         analyser.onlyDirectDependencies = self.onlyDirectDependencies
         
         let libraries = analyser.analyseApp(folderPath: path)
-        os_log(.debug, "Dependencies: ")
+        Logger.log(.debug, "Dependencies: ")
         for library in libraries {
             var subTarget = ""
             if let value = library.subtarget {
@@ -32,12 +32,12 @@ class DependencyChecker {
             
             if let direct = library.directDependency {
                 if direct {
-                    os_log(.debug, "\(library.name) \(library.versionString)\(subTarget)")
+                    Logger.log(.debug, "\(library.name) \(library.versionString)\(subTarget)")
                 } else {
-                    os_log(.debug, "Indirect: \(library.name) \(library.versionString)\(subTarget)")
+                    Logger.log(.debug, "Indirect: \(library.name) \(library.versionString)\(subTarget)")
                 }
             } else {
-                os_log(.debug, "\(library.name) \(library.versionString)\(subTarget)")
+                Logger.log(.debug, "\(library.name) \(library.versionString)\(subTarget)")
             }
         }
         
@@ -60,7 +60,7 @@ class DependencyChecker {
         for analysedLibrary in analysedLibraries {
             if let cpe = cpeFinder.findCPEForLibrary(name: analysedLibrary.name) {
                 analysedLibrary.cpe = cpe
-                os_log(.debug, "for library \(analysedLibrary.name) found cpe: \(cpe)")
+                Logger.log(.debug, "for library \(analysedLibrary.name) found cpe: \(cpe)")
             }
         }
         
@@ -70,7 +70,7 @@ class DependencyChecker {
             if let cpe = analysedLibrary.cpe {
                 let cveData = vulnerabilityAnalyser.queryVulnerabilitiesFor(cpe: cpe)
                 analysedLibrary.vulnerabilities = cveData
-                os_log(.debug, "for library: \(analysedLibrary.name) found \(cveData.count) vulnerabilities")
+                Logger.log(.debug, "for library: \(analysedLibrary.name) found \(cveData.count) vulnerabilities")
             }
         }
         
@@ -79,7 +79,7 @@ class DependencyChecker {
         var vulnerableVersionsUsed: [(library: Library, vulnerability: CVEData)] = []
         
         for library in analysedLibraries {
-            os_log(.debug, "For library \(library.name) following vulnerabilities were found:")
+            Logger.log(.debug, "For library \(library.name) following vulnerabilities were found:")
             let versions = library.vulnerableVersionsUsed
             vulnerableVersionsUsed.append(contentsOf: versions)
         }
@@ -102,25 +102,25 @@ class AnalysedLibrary {
         var vulnerableVersions: [(library: Library, vulnerability: CVEData)] = []
         
         for vulnerability in vulnerabilities {
-            os_log(.debug, "vulnerability: \(vulnerability.cve?.description ?? "")")
+            Logger.log(.debug, "vulnerability: \(vulnerability.cve?.description ?? "")")
             if let versions = vulnerability.configuration?.affectedVersions {
             libraryLoop: for library in versionsUsed {
-                    os_log(.debug, "library: \(library.name)")
+                    Logger.log(.debug, "library: \(library.name)")
                     for version in versions {
-                        os_log(.debug, "version: \(version.versionString)")
+                        Logger.log(.debug, "version: \(version.versionString)")
                         let libraryVersion = Version(from: library.versionString)
-                        os_log(.debug, "compare: \(library.versionString), \(version.versionString)")
+                        Logger.log(.debug, "compare: \(library.versionString), \(version.versionString)")
                         if let libraryComparable = libraryVersion.comparableVersion {
                             if let exact = version.exactVersion {
                                 let exactVersion = Version(from: exact)
                                 
                                 if let exactVersionComparable = exactVersion.comparableVersion {
                                     if libraryComparable == exactVersionComparable {
-                                        os_log(.debug, "is a match")
+                                        Logger.log(.debug, "is a match")
                                         vulnerableVersions.append((library: library, vulnerability: vulnerability))
                                         continue libraryLoop
                                     } else {
-                                        os_log(.debug, "not a match ")
+                                        Logger.log(.debug, "not a match ")
                                         continue 
                                     }
                                 }
@@ -131,14 +131,14 @@ class AnalysedLibrary {
                                 
                                 if let endExcludingComparable = endExcludingVersion.comparableVersion {
                                     if libraryComparable >= endExcludingComparable {
-                                        os_log(.debug, "continue")
+                                        Logger.log(.debug, "continue")
                                         continue
                                     }
                                 } else {
                                     //TODO what do we do then? Currently will include it just in case
                                 }
                             } else {
-                                os_log(.debug, "not comparable \(version.versionEndExcluding ?? "")")
+                                Logger.log(.debug, "not comparable \(version.versionEndExcluding ?? "")")
                             }
                             
                             if let endIncluding = version.versionEndIncluding {
@@ -150,7 +150,7 @@ class AnalysedLibrary {
                                     }
                                 }
                             } else {
-                                os_log(.debug, "not comparable \(version.versionEndIncluding ?? "")")
+                                Logger.log(.debug, "not comparable \(version.versionEndIncluding ?? "")")
                             }
                             
                             if let startExcluding = version.versionStartExcluding {
@@ -162,7 +162,7 @@ class AnalysedLibrary {
                                     }
                                 }
                             } else {
-                                os_log(.debug, "not comparable \(version.versionStartExcluding ?? "")")
+                                Logger.log(.debug, "not comparable \(version.versionStartExcluding ?? "")")
                             }
                             
                             if let startIncluding = version.versionStartIncluding {
@@ -174,14 +174,14 @@ class AnalysedLibrary {
                                     }
                                 }
                             } else {
-                                os_log(.debug, "not comparable \(version.versionStartIncluding ?? "")")
+                                Logger.log(.debug, "not comparable \(version.versionStartIncluding ?? "")")
                             }
                             
                         } else {
-                            os_log(.debug, "not comparable")
+                            Logger.log(.debug, "not comparable")
                         }
                         
-                        os_log(.debug, "is a match")
+                        Logger.log(.debug, "is a match")
                         vulnerableVersions.append((library: library, vulnerability: vulnerability))
                         continue libraryLoop
                     }
@@ -237,7 +237,7 @@ class ComparableVersion: Comparable {
     }
     
     static func < (lhs: ComparableVersion, rhs: ComparableVersion) -> Bool {
-        os_log(.debug, "compare: \(lhs.values) < \(rhs.values)")
+        Logger.log(.debug, "compare: \(lhs.values) < \(rhs.values)")
         var total = 0
         if lhs.values.count > rhs.values.count {
             total = rhs.values.count
@@ -245,19 +245,19 @@ class ComparableVersion: Comparable {
             total = lhs.values.count
         }
         
-        os_log(.debug, "total: \(total)")
-        os_log(.debug, "rhs.count \(rhs.values.count), lhs.values.count: \(lhs.values.count)")
+        Logger.log(.debug, "total: \(total)")
+        Logger.log(.debug, "rhs.count \(rhs.values.count), lhs.values.count: \(lhs.values.count)")
         for i in 0...(total - 1) {
-            os_log(.debug, "\(i) \(lhs.values[i]) > \(rhs.values[i] )")
+            Logger.log(.debug, "\(i) \(lhs.values[i]) > \(rhs.values[i] )")
             if lhs.values[i] > rhs.values[i] {
-                os_log(.debug, "yes")
+                Logger.log(.debug, "yes")
                 return false
             }
             
             if lhs.values[i] < rhs.values[i] {
                 return true
             }
-            os_log(.debug, "no")
+            Logger.log(.debug, "no")
         }
         
         if lhs == rhs {

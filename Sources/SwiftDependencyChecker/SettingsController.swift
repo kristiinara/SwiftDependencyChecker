@@ -60,7 +60,7 @@ class SettingsController {
             do {
                 try encoded.write(to: url)
             } catch {
-                os_log(.error, "Could not save settings")
+                Logger.log(.error, "Could not save settings")
             }
         }
     }
@@ -70,7 +70,7 @@ class SettingsController {
             do {
                 try FileManager.default.createDirectory(at: self.folder, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                os_log(.error, "Could not create folder: \(self.folder)")
+                Logger.log(.error, "Could not create folder: \(self.folder)")
             }
         }
     }

@@ -23,12 +23,12 @@ class Helper {
             return output
         }
         
-        os_log(.debug, "Helper.shell did not return anything")
+        Logger.log(.debug, "Helper.shell did not return anything")
         return ""
     }
     
     static func shellOptinal(launchPath path: String, arguments args: [String]) -> String? {
-        //os_log("Helper.shell")
+        //Logger.log("Helper.shell")
         
         var output: String? = nil
         
@@ -58,7 +58,7 @@ class Helper {
     }
     
     static func shellAsync(launchPath path: String, arguments args: [String], completion: @escaping ((String, Bool) -> Void )){
-        //os_log("Helper.shell")
+        //Logger.log("Helper.shell")
         autoreleasepool {
             let task = Process()
             task.launchPath = path

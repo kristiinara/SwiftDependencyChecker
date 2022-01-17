@@ -43,22 +43,22 @@ class DependencyAnalyser {
     }
     
     var shouldUpdate: Bool {
-        os_log(.info, "last updated: \(self.translations.lastUpdated)")
+        Logger.log(.info, "last updated: \(self.translations.lastUpdated)")
         
         if let timeInterval = self.settings.specTranslationTimeInterval {
             // check if time since last updated is larger than the allowed timeinterval for updates
             if self.translations.lastUpdated.timeIntervalSinceNow * -1 > timeInterval {
-                os_log(.info, "Will update spec data")
+                Logger.log(.info, "Will update spec data")
                 return true
             }
         }
         
-        os_log(.info, "No update")
+        Logger.log(.info, "No update")
         return false
     }
     
     func update() {
-        os_log(.debug, "update spec directory")
+        Logger.log(.debug, "update spec directory")
         self.updateSpecDirectory()
         var updatedTranslations: [String: Translation] = [:]
         
@@ -79,9 +79,9 @@ class DependencyAnalyser {
         let directory = self.settings.specDirectory
         let specPath = directory.appendingPathComponent("Specs", isDirectory: true)
         
-        os_log(.debug, "check spec path: \(specPath.path)")
+        Logger.log(.debug, "check spec path: \(specPath.path)")
         let pathExists = FileManager.default.fileExists(atPath: specPath.path)
-        os_log(.debug, "path exists: \(pathExists)")
+        Logger.log(.debug, "path exists: \(pathExists)")
         
         return pathExists
     }
@@ -89,20 +89,20 @@ class DependencyAnalyser {
     func checkoutSpecDirectory() {
         let source = "https://github.com/CocoaPods/Specs.git"
         let directory = self.specDirectory
-        os_log(.info, "checkout spec directory into \(directory)")
+        Logger.log(.info, "checkout spec directory into \(directory)")
         
         let res = Helper.shell(launchPath: "/usr/bin/git", arguments: ["clone", source, directory])
             
-        os_log(.debug, "Git clone.. \(res)")
+        Logger.log(.debug, "Git clone.. \(res)")
     }
     
     func updateSpecDirectory() {
-        os_log(.debug, "update spec directory")
+        Logger.log(.debug, "update spec directory")
         let directory = self.specDirectory
         let gitPath = "\(directory)/.git"
         
         let res = Helper.shell(launchPath: "/usr/bin/git", arguments: ["--git-dir", gitPath, "--work-tree", directory, "pull"])
-        os_log(.debug, "Git pull.. \(res)")
+        Logger.log(.debug, "Git pull.. \(res)")
     }
     
     deinit {
@@ -116,7 +116,7 @@ class DependencyAnalyser {
             do {
                 try FileManager.default.createDirectory(at: self.folder, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                os_log(.error, "Could not create folder: \(self.folder)")
+                Logger.log(.error, "Could not create folder: \(self.folder)")
             }
         }
     }
@@ -129,7 +129,7 @@ class DependencyAnalyser {
             do {
                 try encoded.write(to: url)
             } catch {
-                os_log(.error, "Could not save translations")
+                Logger.log(.error, "Could not save translations")
             }
         }
     }
@@ -159,7 +159,7 @@ class DependencyAnalyser {
                 do {
                     try encoded.write(to: projectsUrl)
                 } catch {
-                    os_log(.error, "Could not save projects")
+                    Logger.log(.error, "Could not save projects")
                 }
             }
         }
@@ -192,7 +192,7 @@ class DependencyAnalyser {
     }
         
     func translateLibraryVersion(name: String, version: String) -> (name: String, module: String?, version: String?)? {
-        os_log(.debug, "translate library name: \(name), version: \(version)")
+        Logger.log(.debug, "translate library name: \(name), version: \(version)")
         
         let specSubPath = "\(self.specDirectory)/Specs"
         
@@ -213,10 +213,10 @@ class DependencyAnalyser {
                     let enumerator = FileManager.default.enumerator(atPath: path)
                     var podSpecPath: String? = nil
                     while let filename = enumerator?.nextObject() as? String {
-                        os_log(.debug, "\(filename)")
+                        Logger.log(.debug, "\(filename)")
                         if filename.hasSuffix("podspec.json") {
                             podSpecPath = "\(path)/\(filename)"
-                            os_log(.debug, "\(podSpecPath!)")
+                            Logger.log(.debug, "\(podSpecPath!)")
                         }
                         
                         if filename.lowercased().hasPrefix("\(version)/") && filename.hasSuffix("podspec.json"){
@@ -254,18 +254,18 @@ class DependencyAnalyser {
                         }
                     }
                     if let podSpecPath = podSpecPath {
-                        os_log(.debug, "parse podSpecPath: \(podSpecPath)")
+                        Logger.log(.debug, "parse podSpecPath: \(podSpecPath)")
                         var libraryName: String? = nil
                         
                         let values = findValuesInPodspecFile(keys: ["module_name", "git"], path: podSpecPath)
                         
                         let gitPath = values["git"] ?? ""
-                        os_log(.debug, "found gitPath: \(gitPath)")
+                        Logger.log(.debug, "found gitPath: \(gitPath)")
                         
                         libraryName = getNameFromGitPath(path: gitPath)
                         
                         var module = values["module_name"]
-                        os_log(.debug, "moduleString: \(module ?? "")")
+                        Logger.log(.debug, "moduleString: \(module ?? "")")
                         
                         if var libraryName = libraryName {
                             libraryName = libraryName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -289,13 +289,13 @@ class DependencyAnalyser {
                 }
             }
         } else {
-            os_log(.debug, "specpath: \(specSubPath)")
+            Logger.log(.debug, "specpath: \(specSubPath)")
             //find library in specs
             let enumerator = FileManager.default.enumerator(atPath: specSubPath)
             while let filename = enumerator?.nextObject() as? String {
-                //os_log("\(filename), looking for \(name)")
+                //Logger.log("\(filename), looking for \(name)")
                 if filename.lowercased().hasSuffix("/\(name)") {
-                    os_log(.debug, "found: \(filename)")
+                    Logger.log(.debug, "found: \(filename)")
                     
                     let translation = Translation(podspecName: name)
                     translation.specFolderPath = "\(specSubPath)/\(filename)"
@@ -323,6 +323,12 @@ class DependencyAnalyser {
                 [cocoaPodsVersion: tag]
             )
          */
+        
+        let translation = Translation(podspecName: name)
+        translation.noTranslation = true
+        self.translations.translations[name] = translation
+        self.changed = true
+        
         return nil
     }
     
@@ -349,7 +355,7 @@ class DependencyAnalyser {
                 }
             }
         } else {
-            os_log(.error, "Could not read spec file at: \(path)")
+            Logger.log(.error, "Could not read spec file at: \(path)")
         }
         
         return dictionary
@@ -365,12 +371,12 @@ class DependencyAnalyser {
         dependencyFiles.append(findCarthageFile(homePath: folderPath))
         dependencyFiles.append(findSwiftPMFile(homePath: folderPath))
 
-        os_log(.debug, "dependencyFiles: \(dependencyFiles)")
+        Logger.log(.debug, "dependencyFiles: \(dependencyFiles)")
         
         for dependencyFile in dependencyFiles {
             if dependencyFile.used {
                 if !dependencyFile.resolved {
-                    os_log(.debug, "Dependency \(dependencyFile.type.rawValue) defined, but not resolved.")
+                    Logger.log(.debug, "Dependency \(dependencyFile.type.rawValue) defined, but not resolved.")
                     continue
                 }
                 
@@ -393,7 +399,7 @@ class DependencyAnalyser {
     }
     
     func handleCarthageFile(path: String) -> [Library] {
-        os_log(.debug, "handle carthage")
+        Logger.log(.debug, "handle carthage")
         var libraries: [Library] = []
         do {
             let data = try String(contentsOfFile: path, encoding: .utf8)
@@ -401,7 +407,7 @@ class DependencyAnalyser {
             
             for line in lines {
                 let components = line.components(separatedBy: .whitespaces)
-                os_log(.debug, "components: \(components)")
+                Logger.log(.debug, "components: \(components)")
                 // components[0] = git, github
                 
                 if components.count != 3 {
@@ -440,20 +446,20 @@ class DependencyAnalyser {
                 libraries.append(library)
             }
         } catch {
-            os_log(.error, "could not read carthage file \(path)")
+            Logger.log(.error, "could not read carthage file \(path)")
         }
         
         return libraries
     }
     
     func handlePodsFile(path: String) -> [Library] {
-        os_log(.debug, "handle pods")
+        Logger.log(.debug, "handle pods")
         var libraries: [Library] = []
         var declaredPods: [String] = []
         do {
             let data = try String(contentsOfFile: path, encoding: .utf8)
             let lines = data.components(separatedBy: .newlines)
-            os_log(.debug, "lines: \(lines)")
+            Logger.log(.debug, "lines: \(lines)")
             
             // at some point there was a change with intendations in
             
@@ -470,7 +476,7 @@ class DependencyAnalyser {
                     charactersBeforeDash = line.components(separatedBy: "-")[0]
                     break
                 }
-                os_log(.debug, "characters before dash: \(charactersBeforeDash)")
+                Logger.log(.debug, "characters before dash: \(charactersBeforeDash)")
             }
             
             
@@ -503,7 +509,7 @@ class DependencyAnalyser {
                 }
             }
             
-            os_log(.debug, "declared pods: \(declaredPods)")
+            Logger.log(.debug, "declared pods: \(declaredPods)")
             
             for var line in lines {
                 if line.starts(with: "DEPENDENCIES:") {
@@ -523,7 +529,7 @@ class DependencyAnalyser {
                     line = line.replacingOccurrences(of: "\(charactersBeforeDash)- ", with: "")
                     let components = line.components(separatedBy: .whitespaces)
                     
-                    os_log(.debug, "components: \(components)")
+                    Logger.log(.debug, "components: \(components)")
                     
                     if(components.count < 2) {
                         continue
@@ -579,21 +585,21 @@ class DependencyAnalyser {
                     
                     libraries.append(library)
                     
-                    os_log(.debug, "save library, name: \(library.name), version: \(version)")
+                    Logger.log(.debug, "save library, name: \(library.name), version: \(version)")
                 } else {
                     // ignore
                     continue
                 }
             }
         } catch {
-            os_log(.error, "could not read pods file \(path)")
+            Logger.log(.error, "could not read pods file \(path)")
         }
         
         return libraries
     }
     
     func handleSwiftPmFile(path: String) -> [Library] {
-        os_log(.debug, "handle swiftpm")
+        Logger.log(.debug, "handle swiftpm")
         var libraries: [Library] = []
         do {
             let data = try Data(contentsOf: URL(fileURLWithPath: path))
@@ -636,7 +642,7 @@ class DependencyAnalyser {
                 }
             }
         } catch {
-            os_log(.error, "could not read swiftPM file \(path)")
+            Logger.log(.error, "could not read swiftPM file \(path)")
         }
         
         return libraries
