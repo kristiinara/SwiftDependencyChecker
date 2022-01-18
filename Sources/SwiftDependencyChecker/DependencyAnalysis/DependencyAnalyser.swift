@@ -5,7 +5,6 @@
 //  Created by Kristiina Rahkema on 01.01.2022.
 //
 import Foundation
-import os.log
 
 class DependencyAnalyser {
     var translations: Translations

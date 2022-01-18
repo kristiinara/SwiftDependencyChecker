@@ -7,7 +7,6 @@
 
 import Foundation
 import Gzip
-import os.log
 
 class CPEFinder {
     var cpeDictionary: CPEDictionary

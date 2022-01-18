@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import os.log
 
 class Helper {
     static func shell(launchPath path: String, arguments args: [String]) -> String {

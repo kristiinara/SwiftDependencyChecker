@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import os.log
 
 class SourceAnalyser {
     func analyseProject(path: String, vulnerableLibraries: [(library: Library, vulnerability: CVEData)]) -> [FileLocation] {
