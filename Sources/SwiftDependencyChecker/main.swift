@@ -75,8 +75,6 @@ struct Application: ParsableCommand {
         var logLevel: Level = .info
         
         mutating func run() {
-            print("path: \(path)")
-            
             switch(logLevel) {
             case .info:
                 Logger.setLevel = .info
@@ -87,12 +85,14 @@ struct Application: ParsableCommand {
             case .none:
                 Logger.setLevel = .none
             }
+            Logger.log(.info, "[i] Analysing path: \(path)")
             
             let settings = Settings()
             
+            Logger.log(.info, "[i] Selected action: \(action.rawValue)")
+            
             switch action {
             case .all:
-                print("action: all")
                 let analyser = DependencyChecker(settings: settings)
                 analyser.onlyDirectDependencies = onlyDirectDependencies
                 
@@ -104,7 +104,12 @@ struct Application: ParsableCommand {
                         subTarget = " - \(value)"
                     }
                     
-                    print("  --  \(vulnerableVersion.library.name) - \(vulnerableVersion.library.versionString)\(subTarget)")
+                    var module = ""
+                    if let value = vulnerableVersion.library.module {
+                        module = " (\(value))"
+                    }
+                    
+                    print("Library: \(vulnerableVersion.library.name) - \(vulnerableVersion.library.versionString)\(subTarget)\(module)")
                     if let description = vulnerableVersion.vulnerability.cve?.description {
                         print("  --  description: \(description)")
                     }
@@ -134,7 +139,6 @@ struct Application: ParsableCommand {
                     print("\(location.path):\(location.line):8: warning: \(location.warning) (vulnerable version)")
                 }
             case .dependencies:
-                print("action: dependencies")
                 let analyser = DependencyAnalyser(settings: settings)
                 analyser.onlyDirectDependencies = onlyDirectDependencies
                 let libraries = analyser.analyseApp(folderPath: path)
@@ -168,7 +172,6 @@ struct Application: ParsableCommand {
                     }
                 }
             case .findcpe:
-                print("action: findcpe")
                 let analyser = CPEFinder(settings: settings)
                 if let specificValue = specificValue {
                     print("For library name: \(specificValue)")
@@ -178,10 +181,9 @@ struct Application: ParsableCommand {
                         print("no found cpe")
                     }
                 } else {
-                    print("Currently only analysis with specific value supported.")
+                    print("[!] Currently only analysis with specific value supported.")
                 }
             case .querycve:
-                print("action: querycve")
                 let analyser = VulnerabilityAnalyser(settings: settings)
                 if let specificValue = specificValue {
                     print("Vulnerabilities for cpe: \(specificValue)")
@@ -212,15 +214,14 @@ struct Application: ParsableCommand {
                                 }
                             }
                         } else {
-                            print("no description")
+                            print("[!] No description")
                         }
                     }
                 } else {
-                    print("Currently only analysis with specific value supported.")
+                    print("[!] Currently only analysis with specific value supported.")
                 }
                 
             case .translate:
-                print("action: translate")
                 let analyser = DependencyAnalyser(settings: settings)
                 if let specificValue = specificValue {
                     let components = specificValue.split(separator: ",")
@@ -235,10 +236,10 @@ struct Application: ParsableCommand {
                             print("no translation")
                         }
                     } else {
-                        print("Specific value should be of form: name,version")
+                        print("[!] Specific value should be of form: name,version")
                     }
                 } else {
-                    print("Currently only analysis with specific value supported.")
+                    print("[!] Currently only analysis with specific value supported.")
                 }
             }
             

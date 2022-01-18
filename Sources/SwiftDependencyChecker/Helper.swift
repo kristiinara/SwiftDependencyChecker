@@ -9,6 +9,7 @@ import Foundation
 
 class Helper {
     static func shell(launchPath path: String, arguments args: [String]) -> String {
+        Logger.log(.debug, "[*] Running Helper.shell for path \(path), arguments: \(args)")
         var output = shellOptinal(launchPath: path, arguments: args)
         
         if let output = output {
@@ -19,15 +20,16 @@ class Helper {
         output = shellOptinal(launchPath: path, arguments: args)
         
         if let output = output {
+            Logger.log(.debug, "[i] Helper.shell output: \(output)")
             return output
         }
         
-        Logger.log(.debug, "Helper.shell did not return anything")
+        Logger.log(.debug, "[i] Helper.shell did not return anything")
         return ""
     }
     
     static func shellOptinal(launchPath path: String, arguments args: [String]) -> String? {
-        //Logger.log("Helper.shell")
+        Logger.log(.debug, "[*] Running Helper.shellOptional for path \(path), arguments: \(args)")
         
         var output: String? = nil
         
@@ -57,7 +59,7 @@ class Helper {
     }
     
     static func shellAsync(launchPath path: String, arguments args: [String], completion: @escaping ((String, Bool) -> Void )){
-        //Logger.log("Helper.shell")
+        Logger.log(.debug, "[*] Running Helper.shellAsync for path \(path), arguments: \(args)")
         autoreleasepool {
             let task = Process()
             task.launchPath = path

@@ -9,15 +9,14 @@ import Foundation
 
 class SourceAnalyser {
     func analyseProject(path: String, vulnerableLibraries: [(library: Library, vulnerability: CVEData)]) -> [FileLocation] {
-        Logger.log(.info, "analysing project files")
+        Logger.log(.info, "[*] Analysing project files in \(path) ...")
         var fileLocations: [FileLocation] = []
         
         let enumerator = FileManager.default.enumerator(atPath: path)
         while let filename = enumerator?.nextObject() as? String {
-            //Logger.log(filename)
             if filename.hasSuffix(".swift") || filename.hasSuffix("Podfile.lock") || filename.hasSuffix("Package.resolved") || filename.hasSuffix("Cartfile.resolved") {
                 let fullPath = "\(path)/\(filename)"
-                Logger.log(.debug, "fullpath: \(fullPath)")
+                Logger.log(.debug, "[i] Found related file: \(fullPath)")
                 
                 var detectedPlatform: String? = nil
                 if filename.hasSuffix("Podfile.lock") {
@@ -46,7 +45,7 @@ class SourceAnalyser {
                                 name = name.replacingOccurrences(of: "\"", with: "")
                                 name = name.replacingOccurrences(of: ",", with: "")
                                 
-                                Logger.log(.debug, "import: \(name)")
+                                Logger.log(.debug, "[i] Found import statement: \(name)")
                                 for libraryDef in vulnerableLibraries {
                                     if let platform = libraryDef.library.platform, let detectedPlatform = detectedPlatform {
                                         if platform != detectedPlatform {
@@ -63,9 +62,10 @@ class SourceAnalyser {
                                         libraryName = "\(libraryName)/\(subTarget)"
                                     }
                                     
-                                    Logger.log(.debug, "comparing to library: \(libraryName)")
+                                    Logger.log(.debug, "[*] Comparing to library: \(libraryName)")
                                     
                                     if libraryName.hasSuffix("\(name.lowercased())") {
+                                        Logger.log(.debug, "[i] Found match")
                                         var warning = "vulnerable"
                                         if let description = libraryDef.vulnerability.cve?.description {
                                             warning = description

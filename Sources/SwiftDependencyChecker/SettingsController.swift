@@ -26,6 +26,8 @@ class SettingsController {
             home = home.appendingPathComponent("DependencyInfo", isDirectory: true)
         }
         
+        Logger.log(.debug, "[*] Initiating settnings from: \(home)")
+        
         self.folder = home
         self.url = self.folder.appendingPathComponent("settings.json")
         
@@ -59,7 +61,7 @@ class SettingsController {
             do {
                 try encoded.write(to: url)
             } catch {
-                Logger.log(.error, "Could not save settings")
+                Logger.log(.error, "[!] Could not save settings")
             }
         }
     }
@@ -69,7 +71,7 @@ class SettingsController {
             do {
                 try FileManager.default.createDirectory(at: self.folder, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                Logger.log(.error, "Could not create folder: \(self.folder)")
+                Logger.log(.error, "[!] Could not create folder: \(self.folder)")
             }
         }
     }

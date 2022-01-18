@@ -44,22 +44,22 @@ class CPEFinder {
     }
     
     var shouldUpdate: Bool {
-        Logger.log(.info, "last updated: \(self.cpeDictionary.lastUpdated)")
+        Logger.log(.info, "[i] Last updated cpe dictionary: \(self.cpeDictionary.lastUpdated)")
         
         if let timeInterval = self.settings.cpeTimeInterval {
             // check if time since last updated is larger than the allowed timeinterval for updates
             if self.cpeDictionary.lastUpdated.timeIntervalSinceNow * -1 > timeInterval {
-                Logger.log(.info, "Will update cpe data")
+                Logger.log(.info, "[i] Will update cpe dictionary")
                 return true
             }
         }
         
-        Logger.log(.info, "No update")
+        Logger.log(.info, "[i] No update for cpe dictionary")
         return false
     }
     
     func update() {
-        Logger.log(.debug, "update cpe data file")
+        Logger.log(.debug, "[*] Updating cpe dictionary")
         self.updateCPEDataFile()
         var updatedCPEs: [String: CPE] = [:]
         
@@ -79,14 +79,15 @@ class CPEFinder {
     func checkCPEDatafile() -> Bool{
         let path = self.cpePath.path
         
-        Logger.log(.debug, "check cpe data path: \(path)")
+        Logger.log(.debug, "[*] Checking cpe data path: \(path)")
         let pathExists = FileManager.default.fileExists(atPath: path)
-        Logger.log(.debug, "path exists: \(pathExists)")
+        Logger.log(.debug, "[i] Cpe data path exists: \(pathExists)")
         
         return pathExists
     }
     
     func downloadCPEDataFile() {
+        Logger.log(.info, "[i] Downloading new CPE data file...")
         let downloadPath = "https://nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.3.xml.gz"
         if let downloadURL = URL(string: downloadPath) {
             let gzipPath = self.cpePath.appendingPathExtension("gz")
@@ -97,19 +98,20 @@ class CPEFinder {
                     let decompressedData = try data.gunzipped()
                     try decompressedData.write(to: self.cpePath)
                 } catch {
-                    Logger.log(.error, "Downloading official cpe dictionary failed: \(error.localizedDescription)")
+                    Logger.log(.error, "[!] Downloading official cpe dictionary failed: \(error.localizedDescription)")
                 }
             }
         } else {
-            Logger.log(.error, "Download path not a valid URL \(downloadPath)")
+            Logger.log(.error, "[!] Download path not a valid URL \(downloadPath)")
         }
     }
     
     func updateCPEDataFile() {
+        Logger.log(.debug, "[*] Updateing CPE data file")
         do {
             try FileManager.default.removeItem(at: self.cpePath)
         } catch {
-            Logger.log(.error, "Removing cpe dictionary failed: \(error.localizedDescription)")
+            Logger.log(.error, "[!] Removing cpe dictionary failed: \(error.localizedDescription)")
         }
         self.downloadCPEDataFile()
     }
@@ -128,7 +130,7 @@ class CPEFinder {
             do {
                 try encoded.write(to: url)
             } catch {
-                Logger.log(.error, "Could not save cpes")
+                Logger.log(.error, "[!] Could not save cpes")
             }
         }
     }
@@ -138,22 +140,24 @@ class CPEFinder {
             do {
                 try FileManager.default.createDirectory(at: self.folder, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                Logger.log(.error, "Could not create folder: \(self.folder)")
+                Logger.log(.error, "[!] Could not create folder: \(self.folder)")
             }
         }
     }
     
     
     func findCPEForLibrary(name: String) -> String? {
+        Logger.log(.debug, "[*] Finding CPE for library \(name)")
         if let cpe = self.cpeDictionary.dictionary[name] {
+            Logger.log(.debug, "[i] Found existing CPE value: \(cpe.value)")
             return cpe.value
         }
         if name.contains("/") {
             let cpePath = self.cpePath.path
 
             if FileManager.default.fileExists(atPath: cpePath) {
-                Logger.log(.debug, "cpe for title: \(name)")
-                Logger.log(.debug, "querying from file: \(cpePath)")
+                Logger.log(.debug, "[*] Searching for cpe for title: \(name)")
+                Logger.log(.debug, "[*] Querying from file: \(cpePath) ...")
                 
                 if let cpeData = try? String(contentsOfFile: cpePath) {
                     let lines = cpeData.components(separatedBy: .newlines)
@@ -183,12 +187,11 @@ class CPEFinder {
                                 if components.count > 0 {
                                     var value = components.last!
                                     value = value.replacingOccurrences(of: "\"/>", with: "")
-                                    //Logger.log(first)
                                     
                                     var splitValues = value.components(separatedBy: ":")
                                     splitValues[5] = "*"
                                     let cleanedCpe = "\(splitValues.joined(separator: ":"))"
-                                    Logger.log(.debug, "cleaned: \(cleanedCpe)")
+                                    Logger.log(.debug, "[i] cleaned cpe: \(cleanedCpe)")
                                     
                                     self.cpeDictionary.dictionary[name] = CPE(value: cleanedCpe)
                                     self.changed = true
@@ -199,13 +202,13 @@ class CPEFinder {
                         }
                     }
                 } else {
-                    Logger.log(.error, "Could not read cpe file at \(cpePath)")
+                    Logger.log(.error, "[!] Could not read cpe file at \(cpePath)")
                 }
             } else {
-                Logger.log(.error, "cpe dictionary not found!")
+                Logger.log(.error, "[!] Cpe dictionary not found!")
             }
         } else {
-            Logger.log(.debug, "name does not contain \"/\"")
+            Logger.log(.debug, "[i] Name does not contain \"/\", ignore")
         }
         
         self.cpeDictionary.dictionary[name] = CPE(value: nil)
