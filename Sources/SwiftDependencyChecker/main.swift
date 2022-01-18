@@ -85,7 +85,7 @@ struct Application: ParsableCommand {
             case .none:
                 Logger.setLevel = .none
             }
-            Logger.log(.info, "[i] Analysing path: \(path)")
+            Logger.log(.info, "[*] Analysing path: \(path)")
             
             let settings = Settings()
             

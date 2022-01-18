@@ -87,7 +87,7 @@ class CPEFinder {
     }
     
     func downloadCPEDataFile() {
-        Logger.log(.info, "[i] Downloading new CPE data file...")
+        Logger.log(.info, "[*] Downloading new CPE data file...")
         let downloadPath = "https://nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.3.xml.gz"
         if let downloadURL = URL(string: downloadPath) {
             let gzipPath = self.cpePath.appendingPathExtension("gz")
