@@ -15,6 +15,7 @@ class CPEFinder {
     var changed = false
     let settings: Settings
     var cpePath: URL
+    var cpeOnlyFromFile = false
     
     init(settings: Settings) {
         self.folder = settings.homeFolder
@@ -145,6 +146,111 @@ class CPEFinder {
         }
     }
     
+    func getNameFrom(url: String) -> String? {
+        var url = url.lowercased()
+        var platform = ""
+        if url.contains("github.com") {
+            platform = "github.com"
+        } else if url.contains("bitbucket.org") {
+            platform = "bitbucket.org"
+        } else {
+            return nil
+        }
+        
+        let components = url.components(separatedBy: platform)
+        if components.count < 2 {
+            return nil
+        }
+        
+        var tail = String(components[1])
+        tail = String(tail.dropFirst()) // Drop : or / in the beginning
+        
+        let parts = tail.split(separator: "/")
+        if parts.count < 2 {
+            return nil
+        }
+        
+        let name = "\(parts[0])/\(parts[1])"
+        return name
+    }
+    
+    func generateDictionaryWithAllCPEs() {
+        let cpePath = self.cpePath.path
+        var foundCount = 0
+
+        if FileManager.default.fileExists(atPath: cpePath) {
+            Logger.log(.debug, "[*] Querying from file: \(cpePath) ...")
+            
+            if let cpeData = try? String(contentsOfFile: cpePath) {
+                let lines = cpeData.components(separatedBy: .newlines)
+                
+                var itemFound = false
+                var lineCount = 0
+                var name = ""
+                
+                for var line in lines {
+                    line = line.lowercased()
+                    
+                    if itemFound {
+                        lineCount += 1
+                    }
+                    
+                    if line.contains("<reference href=") && !itemFound {
+                        Logger.log(.debug, "[i] Found reference: \(line)")
+                        
+                        line = line.trimmingCharacters(in: .whitespaces)
+                        line = line.replacingOccurrences(of: "<reference href=\"", with: "")
+                        let components = line.components(separatedBy: ">")
+                        let href = String(components[0]).replacingOccurrences(of: "\"", with: "")
+                        
+                        if let foundName = getNameFrom(url: href) {
+                            Logger.log(.debug, "[i] Found name: \(foundName)")
+                            name = foundName
+                            itemFound = true
+                            lineCount = 0
+                        } else {
+                            Logger.log(.debug, "[i] No name")
+                        }
+                    }
+                    
+                    if itemFound {
+                        if line.contains("</cpe-item>") {
+                            itemFound = false
+                            lineCount = 0
+                            name = ""
+                        }
+                        
+                        if line.contains("<cpe-23:cpe23-item name=\"") {
+                            let components = line.components(separatedBy: "<cpe-23:cpe23-item name=\"")
+                            if components.count > 0 {
+                                var value = components.last!
+                                value = value.replacingOccurrences(of: "\"/>", with: "")
+                                
+                                var splitValues = value.components(separatedBy: ":")
+                                splitValues[5] = "*"
+                                let cleanedCpe = "\(splitValues.joined(separator: ":"))"
+                                Logger.log(.debug, "[i] cleaned cpe: \(cleanedCpe)")
+                                
+                                self.cpeDictionary.dictionary[name] = CPE(value: cleanedCpe)
+                                self.changed = true
+                                foundCount += 1
+                                Logger.log(.debug, "[i] Total number of cpes found: \(foundCount)")
+                                
+                                if foundCount % 100 == 0 {
+                                    self.save()
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                Logger.log(.error, "[!] Could not read cpe file at \(cpePath)")
+            }
+        } else {
+            Logger.log(.error, "[!] Cpe dictionary not found!")
+        }
+    }
+    
     
     func findCPEForLibrary(name: String) -> String? {
         Logger.log(.debug, "[*] Finding CPE for library \(name)")
@@ -152,6 +258,11 @@ class CPEFinder {
             Logger.log(.debug, "[i] Found existing CPE value: \(cpe.value)")
             return cpe.value
         }
+        
+        if self.cpeOnlyFromFile {
+            return nil
+        }
+        
         if name.contains("/") {
             let cpePath = self.cpePath.path
 

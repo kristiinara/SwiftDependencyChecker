@@ -47,7 +47,7 @@ struct Application: ParsableCommand {
         var path: String = FileManager.default.currentDirectoryPath
         
         enum Action: String, ExpressibleByArgument {
-            case all, dependencies, findcpe, querycve, sourceanalysis, translate
+            case all, dependencies, findcpe, querycve, sourceanalysis, translate, allcpe, allLibraries
         }
         @Option(help: "Action to take. Dependencies detects the dependencies declared. Findcpe finds the corresponding cpe for each library, querycve queries cve-s from NVD database.")
         var action: Action = .all
@@ -66,6 +66,9 @@ struct Application: ParsableCommand {
         
         @Flag(help: "Analyse only direct dependencies.")
         var onlyDirectDependencies = false
+        
+        @Flag(help: "Only query cpe-s from cpes file")
+        var cpeOnlyFromFile = false
         
         enum Level: String, ExpressibleByArgument {
             case debug, info, error, none
@@ -241,8 +244,22 @@ struct Application: ParsableCommand {
                 } else {
                     print("[!] Currently only analysis with specific value supported.")
                 }
+                
+            case .allcpe:
+                let analyser = CPEFinder(settings: settings)
+                analyser.generateDictionaryWithAllCPEs()
+                
+                Logger.log(.info, "Found \(analyser.cpeDictionary.dictionary.keys.count) cpes in total")
+            case .allLibraries:
+                let analyser = DependencyChecker(settings: settings)
+                analyser.cpeOnlyFromFile = cpeOnlyFromFile
+                
+                let results = analyser.analyseLibraries(filePath: path)
+                
+                for library in results.keys {
+                    print("\(library): cpe: \(results[library]!.cpe), vulnerabilities \(results[library]!.vulnerabilities.count)")
+                }
             }
-            
         }
     }
     
@@ -250,17 +267,17 @@ struct Application: ParsableCommand {
         enum Action: String, ExpressibleByArgument {
             case get, set, displayall
         }
-        @Option(help: "Action to take. Dependencies detects the dependencies declared. Findcpe finds the corresponding cpe for each library, querycve queries cve-s from NVD database.")
+        @Option(help: "Action to take: get, set or displayall.")
         var action: Action = .displayall
         
         
         enum Property: String, ExpressibleByArgument {
             case homeFolder, specTimeInterval, cpeTimeInterval, vulnerabilityTimeInterval, specDirectory
         }
-        @Option(help: "which value to set or get")
+        @Option(help: "which property to set or get: homeFolder, specTimeInterval, cpeTimeInterval, vulnerabilityTimeInterval, specDirectory")
         var property: Property?
         
-        @Option(help: "which value to set or get")
+        @Option(help: "which value to set")
         var value: String?
         
         mutating func run() {

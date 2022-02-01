@@ -10,9 +10,56 @@ import Foundation
 class DependencyChecker {
     let settings: Settings
     var onlyDirectDependencies = false
+    var cpeOnlyFromFile = false
     
     init(settings: Settings) {
         self.settings = settings
+    }
+    
+    func analyseLibraries(filePath: String) -> [String: (cpe: String, vulnerabilities: [CVEData])] {
+        Logger.log(.info, "[*] Analysing filePath: \(filePath) ...")
+        
+        var results: [String: (cpe: String, vulnerabilities: [CVEData])] = [:]
+        
+        do {
+            let contents = try String(contentsOf: URL(fileURLWithPath: filePath))
+            
+            let cpeFinder = CPEFinder(settings: settings)
+            cpeFinder.cpeOnlyFromFile = cpeOnlyFromFile
+            
+            let vulnerabilityAnalyser = VulnerabilityAnalyser(settings: settings)
+            
+            let lines = contents.components(separatedBy: .newlines)
+            for line in lines {
+                let libraryName = String(line)
+                if libraryName.contains("/") {
+                    Logger.log(.debug, "[*] Analysing: \(libraryName)...")
+                    
+                    if results.keys.contains(libraryName) {
+                        Logger.log(.debug, "[i] Library already analysed, ignore.")
+                        continue
+                    }
+                    
+                    if let cpe = cpeFinder.findCPEForLibrary(name: libraryName) {
+                        Logger.log(.debug, "[i] Found cpe: \(cpe)")
+                        
+                        let vulnerabilities = vulnerabilityAnalyser.queryVulnerabilitiesFor(cpe: cpe)
+                        Logger.log(.debug, "[i] Found \(vulnerabilities.count) vulnerabilities.")
+                        results[libraryName] = (cpe: cpe, vulnerabilities: vulnerabilities)
+                        
+                    } else {
+                        Logger.log(.debug, "[i] No cpe found")
+                    }
+                    
+                } else {
+                    Logger.log(.debug, "[i] Ignoring line: \(libraryName)")
+                }
+            }
+        } catch {
+            Logger.log(.error, "[!] Could not read file: \(filePath)")
+        }
+        
+        return results
     }
     
     func analyseFolder(path: String) -> [(library: Library, vulnerability: CVEData)] {
