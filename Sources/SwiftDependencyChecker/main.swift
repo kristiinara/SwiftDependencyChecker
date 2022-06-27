@@ -47,7 +47,7 @@ struct Application: ParsableCommand {
         var path: String = FileManager.default.currentDirectoryPath
         
         enum Action: String, ExpressibleByArgument {
-            case all, dependencies, findcpe, querycve, sourceanalysis, translate, allcpe, allLibraries
+            case all, dependencies, findcpe, querycve, sourceanalysis, translate, allcpe, printcpe, alllibraries
         }
         @Option(help: "Action to take. Dependencies detects the dependencies declared. Findcpe finds the corresponding cpe for each library, querycve queries cve-s from NVD database.")
         var action: Action = .all
@@ -97,6 +97,8 @@ struct Application: ParsableCommand {
             switch action {
             case .all:
                 let analyser = DependencyChecker(settings: settings)
+                analyser.cpeOnlyFromFile = cpeOnlyFromFile
+                
                 analyser.onlyDirectDependencies = onlyDirectDependencies
                 
                 let vulnerableVersionsUsed = analyser.analyseFolder(path: path)
@@ -120,6 +122,8 @@ struct Application: ParsableCommand {
             case .sourceanalysis:
                 let analyser = DependencyChecker(settings: settings)
                 analyser.onlyDirectDependencies = onlyDirectDependencies
+                analyser.cpeOnlyFromFile = cpeOnlyFromFile
+                
                 let vulnerableVersionsUsed = analyser.analyseFolder(path: path)
                 
                 /*
@@ -176,6 +180,8 @@ struct Application: ParsableCommand {
                 }
             case .findcpe:
                 let analyser = CPEFinder(settings: settings)
+                analyser.cpeOnlyFromFile = cpeOnlyFromFile
+                
                 if let specificValue = specificValue {
                     print("For library name: \(specificValue)")
                     if let cpe = analyser.findCPEForLibrary(name: specificValue) {
@@ -250,14 +256,36 @@ struct Application: ParsableCommand {
                 analyser.generateDictionaryWithAllCPEs()
                 
                 Logger.log(.info, "Found \(analyser.cpeDictionary.dictionary.keys.count) cpes in total")
-            case .allLibraries:
+            case .alllibraries:
                 let analyser = DependencyChecker(settings: settings)
                 analyser.cpeOnlyFromFile = cpeOnlyFromFile
                 
-                let results = analyser.analyseLibraries(filePath: path)
+                var results = [String: (cpe: String, vulnerabilities: [CVEData])]()
+                
+                if let specificValue = specificValue {
+                    results = analyser.analyseLibraries(filePath: specificValue)
+                } else {
+                    results = analyser.analyseAllLibraries()
+                }
                 
                 for library in results.keys {
                     print("\(library): cpe: \(results[library]!.cpe), vulnerabilities \(results[library]!.vulnerabilities.count)")
+                }
+            case .printcpe:
+                let analyser = CPEFinder(settings: settings)
+                
+                if cpeOnlyFromFile {
+                    Logger.log(.debug, "[i] Cpe only from file.")
+                } else {
+                    Logger.log(.debug, "[*] Generating new cpe dictionary.")
+                    analyser.generateDictionaryWithAllCPEs()
+                }
+                
+                for value in analyser.cpeDictionary.dictionary {
+                    let cpe = value.value
+                    let libraryName = value.key
+                    
+                    print("\(libraryName) \(cpe.value ?? "--")")
                 }
             }
         }

@@ -16,6 +16,25 @@ class DependencyChecker {
         self.settings = settings
     }
     
+    func analyseAllLibraries() -> [String: (cpe: String, vulnerabilities: [CVEData])] {
+        Logger.log(.info, "[*] Analysing all libraries.")
+        
+        var results: [String: (cpe: String, vulnerabilities: [CVEData])] = [:]
+        
+        let cpeFinder = CPEFinder(settings: settings)
+        let vulnerabilityAnalyser = VulnerabilityAnalyser(settings: settings)
+        
+        for value in cpeFinder.cpeDictionary.dictionary {
+            if let cpe = value.value.value {
+                let vulnerabilities = vulnerabilityAnalyser.queryVulnerabilitiesFor(cpe: cpe)
+                Logger.log(.debug, "[i] Found \(vulnerabilities.count) vulnerabilities.")
+                results[value.key] = (cpe: cpe, vulnerabilities: vulnerabilities)
+            }
+        }
+        
+        return results
+    }
+    
     func analyseLibraries(filePath: String) -> [String: (cpe: String, vulnerabilities: [CVEData])] {
         Logger.log(.info, "[*] Analysing filePath: \(filePath) ...")
         

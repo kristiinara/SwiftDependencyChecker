@@ -35,12 +35,14 @@ class CPEFinder {
         self.settings = settings
         self.cpePath = self.settings.homeFolder.appendingPathComponent("official-cpe-dictionary_v2.3.xml", isDirectory: false)
         
-        if self.checkCPEDatafile() == false {
-            self.downloadCPEDataFile()
-        }
+        if !cpeOnlyFromFile {
+            if self.checkCPEDatafile() == false {
+                self.downloadCPEDataFile()
+            }
         
-        if self.shouldUpdate {
-            self.update()
+            if self.shouldUpdate {
+                self.update()
+            }
         }
     }
     

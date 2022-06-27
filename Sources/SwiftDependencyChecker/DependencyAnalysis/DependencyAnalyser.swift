@@ -387,7 +387,9 @@ class DependencyAnalyser {
                     Logger.log(.debug, "[i] Dependency \(dependencyFile.type.rawValue) defined, but not resolved.")
                     continue
                 }
-                
+            }
+            
+            if dependencyFile.resolved {
                 var libraries: [Library] = []
                 if dependencyFile.type == .carthage {
                     libraries = handleCarthageFile(path: dependencyFile.resolvedFile!)
@@ -762,9 +764,41 @@ class DependencyAnalyser {
         
         if !fileManager.fileExists(atPath: resolvedPath!) {
             resolvedPath = nil
+            
+            
+            if let resolvedInProject = findPackageResolved(path: homePath) {
+                resolvedPath = resolvedInProject
+                print("Found path: \(resolvedPath)")
+            }
         }
         
         return DependencyFile(type: .swiftPM, file: definitionPath, resolvedFile: resolvedPath, definitionFile: definitionPath)
+    }
+    
+    func findPackageResolved(path: String) -> String? {
+     // TestApp.xcodeproj % grep -rni "AFNetworking" *
+        // project.xcworkspace/xcshareddata/swiftpm/Package.resolved:5:        "package": "AFNetworking",
+        
+        print("Try to find resolved path in home: \(path)")
+        
+        let enumerator = FileManager.default.enumerator(atPath: path)
+        
+        var resolvedPath: String?
+        
+        while let filename = enumerator?.nextObject() as? String {
+            if filename.hasSuffix(".xcodeproj") {
+                let composedPath = "\(path)/\(filename)/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+                
+                if FileManager.default.fileExists(atPath: composedPath) {
+                    resolvedPath = composedPath
+                    break
+                }
+                
+                enumerator?.skipDescendents()
+            }
+        }
+        
+        return resolvedPath
     }
     
     enum DependencyType: String {
