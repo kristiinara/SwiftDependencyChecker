@@ -18,4 +18,8 @@ Recommended usage is to add the following as a new “Run script” under “Bui
    
     SwiftDependencyChecker analyse --action sourceanalysis
     
+If Xcode complains that the command cannot be found, you can use the full path for the SwiftDependencyCheker tool: 
+
+   /opt/homebrew/bin/SwiftDependencyChecker analyse --action sourceanalysis
+    
 Here is a blogpost with explanations of how the tool is built: https://medium.com/@kristiina_28701/swiftdependencychecker-check-cocoapods-carthage-and-swift-pm-dependencies-for-known-def2fba890c 
